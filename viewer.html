@@ -10,18 +10,15 @@
         * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.3s, color 0.3s; }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); color: var(--text-color); }
         a { text-decoration: none; color: inherit; }
-        
         header { background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .header-left { display: flex; align-items: center; gap: 1rem; }
         .back-btn { font-size: 1.2rem; font-weight: bold; cursor: pointer; color: var(--text-color); }
         .ep-info { font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; }
         .theme-toggle-btn { background: none; border: 2px solid var(--border-color); color: var(--text-color); padding: 0.4rem 0.8rem; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
-        
         .viewer-container { max-width: 800px; margin: 0 auto; background-color: #fff; min-height: 80vh; display: flex; flex-direction: column; align-items: center; }
         [data-theme="dark"] .viewer-container { background-color: #000; }
         .viewer-img { width: 100%; display: block; border: none; }
         .loading-message { padding: 5rem; text-align: center; font-size: 1.2rem; opacity: 0.7; }
-        
         .comment-section { max-width: 800px; margin: 0 auto; padding: 2rem; background-color: var(--card-bg); border-top: 1px solid var(--border-color); }
         .comment-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 1rem; }
         .comment-form { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; background-color: var(--bg-color); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); }
@@ -30,7 +27,6 @@
         .comment-submit-btn { align-self: flex-end; background-color: var(--accent-color); color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .comment-submit-btn:hover { background-color: var(--accent-hover); }
         .comment-submit-btn:disabled { background-color: var(--border-color); cursor: not-allowed; }
-        
         .comment-list { display: flex; flex-direction: column; gap: 1rem; }
         .comment-item { padding: 1rem; border-bottom: 1px solid var(--border-color); }
         .comment-item:last-child { border-bottom: none; }
@@ -39,7 +35,6 @@
         .comment-date { opacity: 0.6; }
         .comment-body { font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; }
         .empty-comment { text-align: center; padding: 2rem; opacity: 0.6; }
-        
         .comment-actions { display: flex; gap: 0.5rem; }
         .action-btn { background: none; border: none; font-size: 0.8rem; color: var(--text-color); opacity: 0.6; cursor: pointer; padding: 0.2rem; }
         .action-btn:hover { opacity: 1; color: var(--accent-color); }
@@ -74,7 +69,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, deleteDoc, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        // increment(숫자 증가 함수)를 가져옵니다.
+        import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, deleteDoc, query, where, onSnapshot, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc", authDomain: "nonametoon-907aa.firebaseapp.com",
@@ -108,12 +104,7 @@
                 commentInput.placeholder = "바른 말 고운 말을 사용해주세요.";
                 commentInput.disabled = false; commentBtn.disabled = false;
             }
-            
-            // 로그인 정보를 확인한 직후에 뷰어를 로드하여 권한 버튼이 정확히 뜨도록 개선
-            if (!isViewerLoaded) {
-                isViewerLoaded = true;
-                loadViewer();
-            }
+            if (!isViewerLoaded) { isViewerLoaded = true; loadViewer(); }
         });
 
         async function loadViewer() {
@@ -129,8 +120,15 @@
                 epTitleDisplay.innerText = `${epData.episode_number}화 - ${epData.title}`;
                 backBtn.href = `detail.html?id=${epData.webtoon_id}`;
                 
-                // ===== 작가일 경우 에피소드 수정 버튼 띄우기 =====
-                const webtoonSnap = await getDoc(doc(db, "webtoons", epData.webtoon_id));
+                const webtoonRef = doc(db, "webtoons", epData.webtoon_id);
+                const webtoonSnap = await getDoc(webtoonRef);
+                
+                // ===== 조회수 증가 로직 =====
+                // 페이지를 열 때마다 해당 에피소드와 원본 웹툰의 전체 조회수를 1씩 올립니다.
+                await updateDoc(epRef, { views: increment(1) });
+                await updateDoc(webtoonRef, { total_views: increment(1) });
+                // =========================
+
                 if (webtoonSnap.exists()) {
                     const wtData = webtoonSnap.data();
                     if (currentUser && currentUser.uid === wtData.author_id) {
@@ -141,10 +139,8 @@
                         epTitleDisplay.appendChild(editEpBtn);
                     }
                 }
-                // ============================================
 
                 viewerContainer.innerHTML = '';
-
                 if (epData.content_images && epData.content_images.length > 0) {
                     epData.content_images.forEach((url) => {
                         const imgEl = document.createElement('img');
@@ -163,22 +159,16 @@
 
         function loadComments() {
             const q = query(collection(db, "comments"), where("episode_id", "==", epId));
-            
             onSnapshot(q, (snapshot) => {
                 commentList.innerHTML = '';
                 commentCountDisplay.innerText = snapshot.size;
 
                 if (snapshot.empty) {
-                    commentList.innerHTML = '<div class="empty-comment">첫 번째 댓글을 남겨보세요!</div>';
-                    return;
+                    commentList.innerHTML = '<div class="empty-comment">첫 번째 댓글을 남겨보세요!</div>'; return;
                 }
 
                 let commentsArray = [];
-                snapshot.forEach((docSnap) => {
-                    commentsArray.push({ id: docSnap.id, ...docSnap.data() });
-                });
-
-                // 최신순 정렬
+                snapshot.forEach((docSnap) => { commentsArray.push({ id: docSnap.id, ...docSnap.data() }); });
                 commentsArray.sort((a, b) => {
                     const timeA = a.created_at ? (a.created_at.toDate ? a.created_at.toDate().getTime() : new Date(a.created_at).getTime()) : 0;
                     const timeB = b.created_at ? (b.created_at.toDate ? b.created_at.toDate().getTime() : new Date(b.created_at).getTime()) : 0;
@@ -193,32 +183,14 @@
                     }
 
                     const isMyComment = currentUser && currentUser.uid === data.user_id;
-
                     const commentItem = document.createElement('div');
                     commentItem.className = 'comment-item';
-                    
-                    const actionHtml = isMyComment ? `
-                        <div class="comment-actions">
-                            <button class="action-btn edit-btn">수정</button>
-                            <button class="action-btn delete-btn">삭제</button>
-                        </div>
-                    ` : '';
+                    const actionHtml = isMyComment ? `<div class="comment-actions"><button class="action-btn edit-btn">수정</button><button class="action-btn delete-btn">삭제</button></div>` : '';
 
-                    commentItem.innerHTML = `
-                        <div class="comment-header">
-                            <div>
-                                <span class="comment-author">${data.nickname}</span>
-                                <span class="comment-date">${dateStr}</span>
-                            </div>
-                            ${actionHtml}
-                        </div>
-                        <div class="comment-body" id="body-${data.id}">${data.content}</div>
-                    `;
+                    commentItem.innerHTML = `<div class="comment-header"><div><span class="comment-author">${data.nickname}</span><span class="comment-date">${dateStr}</span></div>${actionHtml}</div><div class="comment-body" id="body-${data.id}">${data.content}</div>`;
                     
                     if (isMyComment) {
-                        const editBtn = commentItem.querySelector('.edit-btn');
-                        const deleteBtn = commentItem.querySelector('.delete-btn');
-                        const bodyDiv = commentItem.querySelector('.comment-body');
+                        const editBtn = commentItem.querySelector('.edit-btn'); const deleteBtn = commentItem.querySelector('.delete-btn'); const bodyDiv = commentItem.querySelector('.comment-body');
                         
                         deleteBtn.addEventListener('click', async () => {
                             if(confirm("이 댓글을 정말 삭제하시겠습니까?")) {
@@ -228,52 +200,31 @@
 
                         editBtn.addEventListener('click', () => {
                             const currentText = data.content;
-                            bodyDiv.innerHTML = `
-                                <textarea class="edit-textarea">${currentText}</textarea>
-                                <div style="text-align:right;">
-                                    <button class="action-btn save-btn" style="color:var(--accent-color); font-weight:bold;">저장</button>
-                                    <button class="action-btn cancel-btn">취소</button>
-                                </div>
-                            `;
+                            bodyDiv.innerHTML = `<textarea class="edit-textarea">${currentText}</textarea><div style="text-align:right;"><button class="action-btn save-btn" style="color:var(--accent-color); font-weight:bold;">저장</button><button class="action-btn cancel-btn">취소</button></div>`;
+                            const saveBtn = bodyDiv.querySelector('.save-btn'); const cancelBtn = bodyDiv.querySelector('.cancel-btn'); const textarea = bodyDiv.querySelector('.edit-textarea');
                             
-                            const saveBtn = bodyDiv.querySelector('.save-btn');
-                            const cancelBtn = bodyDiv.querySelector('.cancel-btn');
-                            const textarea = bodyDiv.querySelector('.edit-textarea');
-
                             saveBtn.addEventListener('click', async () => {
                                 const newText = textarea.value.trim();
                                 if(!newText) { alert("내용을 입력해주세요."); return; }
-                                try { await updateDoc(doc(db, "comments", data.id), { content: newText }); } 
-                                catch(e) { alert("수정에 실패했습니다."); }
+                                try { await updateDoc(doc(db, "comments", data.id), { content: newText }); } catch(e) { alert("수정에 실패했습니다."); }
                             });
-
                             cancelBtn.addEventListener('click', () => { bodyDiv.innerText = currentText; });
                         });
                     }
-                    
                     commentList.appendChild(commentItem);
                 });
             });
         }
 
         commentForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!currentUser || !epId) return;
-
-            const content = commentInput.value.trim();
-            if (!content) return;
-
+            e.preventDefault(); if (!currentUser || !epId) return;
+            const content = commentInput.value.trim(); if (!content) return;
             commentBtn.disabled = true; commentBtn.innerText = "등록 중...";
             try {
-                await addDoc(collection(db, "comments"), {
-                    episode_id: epId, user_id: currentUser.uid, nickname: currentUser.displayName || "무명독자",
-                    content: content, created_at: serverTimestamp()
-                });
+                await addDoc(collection(db, "comments"), { episode_id: epId, user_id: currentUser.uid, nickname: currentUser.displayName || "무명독자", content: content, created_at: serverTimestamp() });
                 commentInput.value = '';
-            } catch (error) { console.error("댓글 등록 오류:", error); alert("댓글을 등록하지 못했습니다."); } 
-            finally { commentBtn.disabled = false; commentBtn.innerText = "댓글 등록"; }
+            } catch (error) { alert("댓글을 등록하지 못했습니다."); } finally { commentBtn.disabled = false; commentBtn.innerText = "댓글 등록"; }
         });
-
     </script>
     <script>
         const htmlEl = document.documentElement; const themeBtn = document.getElementById('themeToggle');
