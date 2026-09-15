@@ -14,6 +14,8 @@
             --border-color: #dee2e6;
             --accent-color: #6366f1;
             --accent-hover: #4f46e5;
+            --input-bg: #ffffff;
+            --modal-overlay: rgba(0, 0, 0, 0.5);
         }
 
         /* 다크 모드 변수 */
@@ -25,6 +27,8 @@
             --border-color: #404040;
             --accent-color: #818cf8;
             --accent-hover: #6366f1;
+            --input-bg: #1e1e1e;
+            --modal-overlay: rgba(0, 0, 0, 0.7);
         }
 
         /* 기본 설정 */
@@ -32,11 +36,11 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
         }
 
         body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             line-height: 1.6;
@@ -87,8 +91,12 @@
         .nav-links a:hover {
             color: var(--accent-color);
         }
+        
+        .login-btn {
+            font-weight: 700;
+            cursor: pointer;
+        }
 
-        /* 테마 토글 버튼 */
         .theme-toggle-btn {
             background: none;
             border: 2px solid var(--border-color);
@@ -105,7 +113,7 @@
             color: var(--accent-color);
         }
 
-        /* 메인 배너 (Hero Section) */
+        /* 메인 배너 */
         .hero {
             text-align: center;
             padding: 4rem 2rem;
@@ -113,16 +121,8 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        .hero h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .hero p {
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
-            opacity: 0.8;
-        }
+        .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+        .hero p { font-size: 1.1rem; margin-bottom: 2rem; opacity: 0.8; }
 
         .btn-upload {
             background-color: var(--accent-color);
@@ -136,23 +136,16 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .btn-upload:hover {
-            background-color: var(--accent-hover);
-        }
+        .btn-upload:hover { background-color: var(--accent-hover); }
 
-        /* 웹툰 목록 섹션 */
+        /* 웹툰 목록 */
         .webtoon-section {
             max-width: 1200px;
             margin: 3rem auto;
             padding: 0 2rem;
         }
 
-        .section-title {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            font-weight: 700;
-        }
-
+        .section-title { font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 700; }
         .webtoon-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -165,34 +158,124 @@
             border-radius: 12px;
             overflow: hidden;
             cursor: pointer;
-            transition: transform 0.2s;
         }
 
-        .webtoon-card:hover {
-            transform: translateY(-5px);
+        .webtoon-card:hover { border-color: var(--accent-color); }
+        .webtoon-thumbnail { width: 100%; height: 200px; background-color: #ddd; object-fit: cover; }
+        .webtoon-info { padding: 1rem; }
+        .webtoon-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 0.3rem; }
+        .webtoon-author { font-size: 0.9rem; opacity: 0.7; }
+
+        /* --- 로그인 모달 (추가된 부분) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--modal-overlay);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        /* 모달 활성화 클래스 */
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease-out;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            font-size: 1.5rem;
+            background: none; border: none;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--accent-color);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .input-group input:focus {
+            outline: none;
             border-color: var(--accent-color);
         }
 
-        .webtoon-thumbnail {
+        .btn-submit {
             width: 100%;
-            height: 200px;
-            background-color: #ddd;
-            object-fit: cover;
-        }
-
-        .webtoon-info {
-            padding: 1rem;
-        }
-
-        .webtoon-title {
-            font-size: 1.1rem;
+            padding: 0.8rem;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: bold;
-            margin-bottom: 0.3rem;
+            cursor: pointer;
+            margin-top: 1rem;
         }
 
-        .webtoon-author {
+        .btn-submit:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .modal-footer {
+            margin-top: 1.5rem;
+            text-align: center;
             font-size: 0.9rem;
-            opacity: 0.7;
+        }
+
+        .modal-footer a {
+            color: var(--text-color);
+            opacity: 0.8;
+            margin: 0 5px;
+        }
+        
+        .modal-footer a:hover {
+            color: var(--accent-color);
+            opacity: 1;
         }
 
         /* 푸터 */
@@ -204,15 +287,6 @@
             margin-top: 4rem;
         }
 
-        /* 반응형 모바일 설정 */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none; /* 모바일에서는 메뉴 숨김 (햄버거 메뉴로 대체 가능) */
-            }
-            .hero h1 {
-                font-size: 2rem;
-            }
-        }
     </style>
 </head>
 <body>
@@ -225,7 +299,8 @@
                 <a href="#">연재작</a>
                 <a href="#">베스트</a>
                 <a href="#">자유게시판</a>
-                <a href="#">마이페이지</a>
+                <!-- 로그인 버튼 추가 -->
+                <a href="#" class="login-btn" onclick="openLoginModal()">로그인</a>
                 <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()">🌙 다크 모드</button>
             </nav>
         </div>
@@ -235,55 +310,61 @@
     <section class="hero">
         <h1>누구나 웹툰 작가가 될 수 있는 곳</h1>
         <p>당신의 머릿속에만 있던 이야기, 이제 '노넴툰'에서 마음껏 펼쳐보세요.</p>
-        <button class="btn-upload">✏️ 내 작품 올리기</button>
+        <button class="btn-upload" onclick="openLoginModal()">✏️ 내 작품 올리기</button>
     </section>
 
     <!-- 실시간 업데이트 웹툰 -->
     <main class="webtoon-section">
         <h2 class="section-title">✨ 새로 올라온 작품</h2>
         <div class="webtoon-grid">
-            <!-- 웹툰 카드 1 -->
+            <!-- 웹툰 카드들 -->
             <div class="webtoon-card">
                 <img src="https://via.placeholder.com/300x400/eeeeee/999999?text=Webtoon+1" alt="웹툰 썸네일" class="webtoon-thumbnail">
-                <div class="webtoon-info">
-                    <div class="webtoon-title">달빛 아래 그림자</div>
-                    <div class="webtoon-author">작가: 티레놀필</div>
-                </div>
+                <div class="webtoon-info"><div class="webtoon-title">달빛 아래 그림자</div><div class="webtoon-author">작가: 무명A</div></div>
             </div>
-            <!-- 웹툰 카드 2 -->
             <div class="webtoon-card">
                 <img src="https://via.placeholder.com/300x400/eeeeee/999999?text=Webtoon+2" alt="웹툰 썸네일" class="webtoon-thumbnail">
-                <div class="webtoon-info">
-                    <div class="webtoon-title">오늘부터 마법사</div>
-                    <div class="webtoon-author">작가: 글쟁이</div>
-                </div>
+                <div class="webtoon-info"><div class="webtoon-title">오늘부터 마법사</div><div class="webtoon-author">작가: 글쟁이</div></div>
             </div>
-            <!-- 웹툰 카드 3 -->
             <div class="webtoon-card">
                 <img src="https://via.placeholder.com/300x400/eeeeee/999999?text=Webtoon+3" alt="웹툰 썸네일" class="webtoon-thumbnail">
-                <div class="webtoon-info">
-                    <div class="webtoon-title">용사의 은퇴 라이프</div>
-                    <div class="webtoon-author">작가: 백수용사</div>
-                </div>
+                <div class="webtoon-info"><div class="webtoon-title">용사의 은퇴 라이프</div><div class="webtoon-author">작가: 백수용사</div></div>
             </div>
-            <!-- 웹툰 카드 4 -->
             <div class="webtoon-card">
                 <img src="https://via.placeholder.com/300x400/eeeeee/999999?text=Webtoon+4" alt="웹툰 썸네일" class="webtoon-thumbnail">
-                <div class="webtoon-info">
-                    <div class="webtoon-title">평범한 학교생활</div>
-                    <div class="webtoon-author">작가: 김노넴</div>
-                </div>
+                <div class="webtoon-info"><div class="webtoon-title">평범한 학교생활</div><div class="webtoon-author">작가: 김노넴</div></div>
             </div>
-            <!-- 웹툰 카드 5 -->
             <div class="webtoon-card">
                 <img src="https://via.placeholder.com/300x400/eeeeee/999999?text=Webtoon+5" alt="웹툰 썸네일" class="webtoon-thumbnail">
-                <div class="webtoon-info">
-                    <div class="webtoon-title">우주 정거장 101</div>
-                    <div class="webtoon-author">작가: 스페이스</div>
-                </div>
+                <div class="webtoon-info"><div class="webtoon-title">우주 정거장 101</div><div class="webtoon-author">작가: 스페이스</div></div>
             </div>
         </div>
     </main>
+
+    <!-- 로그인 모달 창 (새로 추가됨) -->
+    <div class="modal-overlay" id="loginModal" onclick="closeOnOutsideClick(event)">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeLoginModal()">&times;</button>
+            <h2>노넴툰 로그인</h2>
+            
+            <!-- 로그인 폼 -->
+            <form onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label for="email">이메일</label>
+                    <input type="email" id="email" placeholder="example@email.com" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" placeholder="비밀번호를 입력하세요" required>
+                </div>
+                <button type="submit" class="btn-submit">로그인</button>
+            </form>
+
+            <div class="modal-footer">
+                <a href="#">비밀번호 찾기</a> | <a href="#">회원가입</a>
+            </div>
+        </div>
+    </div>
 
     <!-- 푸터 -->
     <footer>
@@ -291,36 +372,57 @@
         <p style="font-size: 0.8rem; margin-top: 10px; opacity: 0.7;">본 사이트는 무명 작가들의 창작 활동을 응원합니다.</p>
     </footer>
 
-    <!-- 자바스크립트 (테마 토글 로직) -->
+    <!-- 자바스크립트 -->
     <script>
+        // --- 테마 설정 로직 ---
         const htmlEl = document.documentElement;
         const themeBtn = document.getElementById('themeToggle');
-
-        // 사용자가 이전에 설정한 테마 불러오기 (기본값: 라이트모드)
         const savedTheme = localStorage.getItem('theme') || 'light';
+        
         htmlEl.setAttribute('data-theme', savedTheme);
         updateButtonText(savedTheme);
 
         function toggleTheme() {
             const currentTheme = htmlEl.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
-            // 테마 적용
             htmlEl.setAttribute('data-theme', newTheme);
-            
-            // 로컬 스토리지에 저장 (새로고침해도 유지되도록)
             localStorage.setItem('theme', newTheme);
-            
-            // 버튼 텍스트 변경
             updateButtonText(newTheme);
         }
 
         function updateButtonText(theme) {
-            if (theme === 'dark') {
-                themeBtn.innerHTML = '☀️ 라이트 모드';
-            } else {
-                themeBtn.innerHTML = '🌙 다크 모드';
+            themeBtn.innerHTML = theme === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드';
+        }
+
+        // --- 로그인 모달 로직 ---
+        const loginModal = document.getElementById('loginModal');
+
+        // 모달 열기
+        function openLoginModal() {
+            loginModal.classList.add('active');
+            // 스크롤 방지 (선택사항)
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        // 모달 닫기
+        function closeLoginModal() {
+            loginModal.classList.remove('active');
+            // 스크롤 복구
+            document.body.style.overflow = 'auto'; 
+        }
+
+        // 모달 바깥 배경 클릭 시 닫히게 하기
+        function closeOnOutsideClick(event) {
+            if (event.target === loginModal) {
+                closeLoginModal();
             }
+        }
+
+        // 로그인 폼 제출 시 이벤트 (가짜 작동)
+        function handleLogin(event) {
+            event.preventDefault(); // 페이지 새로고침 방지
+            alert('입력하신 정보로 로그인을 시도합니다!\n(실제 기능은 백엔드 서버 연결 후 작동합니다.)');
+            closeLoginModal();
         }
     </script>
 </body>
