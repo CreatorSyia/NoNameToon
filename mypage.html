@@ -150,8 +150,9 @@
                             </div>
                         `;
                         
-                        // 작품 클릭 시 에피소드 관리/추가 페이지로 이동할 수 있도록 준비
-                        card.onclick = () => alert(`'${data.title}' 작품의 회차(에피소드) 관리 페이지로 이동합니다! (추후 구현)`);
+                        // 작품 클릭 시 상세 페이지로 이동하도록 수정 완료!
+                        card.onclick = () => { window.location.href = `detail.html?id=${doc.id}`; };
+                        
                         myWebtoonGrid.appendChild(card);
                     });
 
