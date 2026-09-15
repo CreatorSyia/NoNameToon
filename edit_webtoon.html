@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>작품 수정 - 노넴툰</title>
+    <style>
+        :root { --bg-color: #f8f9fa; --text-color: #212529; --header-bg: #ffffff; --card-bg: #ffffff; --border-color: #dee2e6; --accent-color: #6366f1; --accent-hover: #4f46e5; --input-bg: #ffffff; }
+        [data-theme="dark"] { --bg-color: #121212; --text-color: #e0e0e0; --header-bg: #1e1e1e; --card-bg: #2d2d2d; --border-color: #404040; --accent-color: #818cf8; --accent-hover: #6366f1; --input-bg: #1e1e1e; }
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
+        a { text-decoration: none; color: inherit; }
+        header { background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: var(--accent-color); }
+        .back-btn { font-weight: 600; cursor: pointer; color: var(--text-color); }
+        .upload-container { max-width: 600px; margin: 3rem auto; background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .upload-title { font-size: 1.8rem; margin-bottom: 2rem; text-align: center; font-weight: 800; }
+        .input-group { margin-bottom: 1.5rem; }
+        .input-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; font-size: 0.95rem; }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--input-bg); color: var(--text-color); font-size: 1rem; font-family: inherit; }
+        .input-group textarea { resize: vertical; min-height: 120px; }
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus { outline: none; border-color: var(--accent-color); }
+        .btn-submit { width: 100%; padding: 1rem; background-color: var(--accent-color); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 1rem; }
+        .btn-submit:hover { background-color: var(--accent-hover); }
+        .btn-submit:disabled { background-color: var(--border-color); cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">노넴툰</a>
+        <a href="javascript:history.back()" class="back-btn">⬅️ 뒤로가기</a>
+    </header>
+
+    <main class="upload-container">
+        <h2 class="upload-title">작품 수정하기</h2>
+        
+        <form id="editForm">
+            <div class="input-group">
+                <label for="title">웹툰 제목</label>
+                <input type="text" id="title" required>
+            </div>
+
+            <div class="input-group">
+                <label for="genre">장르</label>
+                <select id="genre" required>
+                    <option value="로맨스">로맨스</option>
+                    <option value="판타지">판타지</option>
+                    <option value="액션">액션</option>
+                    <option value="일상">일상</option>
+                    <option value="스릴러">스릴러</option>
+                    <option value="코미디">코미디</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="description">작품 줄거리</label>
+                <textarea id="description" required></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="thumbnail">썸네일 이미지 URL</label>
+                <input type="url" id="thumbnail" required>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">수정 완료</button>
+        </form>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        // updateDoc을 가져옵니다. (기존 데이터를 덮어쓰는 용도)
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc", authDomain: "nonametoon-907aa.firebaseapp.com",
+            projectId: "nonametoon-907aa", storageBucket: "nonametoon-907aa.firebasestorage.app",
+            messagingSenderId: "581148914100", appId: "1:581148914100:web:03e65a96e29086eff682e1", measurementId: "G-Q5P01H9MKZ"
+        };
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const webtoonId = urlParams.get('id');
+
+        const titleInput = document.getElementById('title');
+        const genreInput = document.getElementById('genre');
+        const descInput = document.getElementById('description');
+        const thumbInput = document.getElementById('thumbnail');
+        const submitBtn = document.getElementById('submitBtn');
+
+        let currentUser = null;
+
+        // 1. 기존 데이터 불러와서 폼에 채워넣기
+        async function loadWebtoonData() {
+            if (!webtoonId) { alert("잘못된 접근입니다."); window.history.back(); return; }
+            
+            try {
+                const docSnap = await getDoc(doc(db, "webtoons", webtoonId));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    
+                    // 작성자 본인인지 체크
+                    if (currentUser.uid !== data.author_id) {
+                        alert("수정 권한이 없습니다.");
+                        window.history.back();
+                        return;
+                    }
+
+                    // 폼에 기존 데이터 채우기
+                    titleInput.value = data.title || "";
+                    genreInput.value = data.genre || "판타지";
+                    descInput.value = data.description || "";
+                    thumbInput.value = data.thumbnail_url || "";
+                } else {
+                    alert("작품을 찾을 수 없습니다.");
+                    window.history.back();
+                }
+            } catch (error) {
+                console.error("로딩 에러", error);
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                loadWebtoonData();
+            } else {
+                alert("로그인이 필요합니다.");
+                window.location.href = "index.html";
+            }
+        });
+
+        // 2. 수정된 데이터 저장(덮어쓰기)
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser || !webtoonId) return;
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "수정 중...";
+
+            try {
+                // updateDoc은 기존 문서를 완전히 새로 만들지 않고, 명시한 항목만 변경해줍니다.
+                await updateDoc(doc(db, "webtoons", webtoonId), {
+                    title: titleInput.value,
+                    genre: genreInput.value,
+                    description: descInput.value,
+                    thumbnail_url: thumbInput.value
+                });
+
+                alert("작품이 수정되었습니다!");
+                window.location.href = `detail.html?id=${webtoonId}`;
+            } catch (error) {
+                console.error("수정 에러:", error);
+                alert("수정 중 오류가 발생했습니다.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "수정 완료";
+            }
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+</body>
+</html>
