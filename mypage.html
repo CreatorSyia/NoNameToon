@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 - 노넴툰</title>
+    <style>
+        /* 기본 테마 변수 */
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --header-bg: #ffffff;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --header-bg: #1e1e1e;
+            --card-bg: #2d2d2d;
+            --border-color: #404040;
+            --accent-color: #818cf8;
+            --accent-hover: #6366f1;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.3s, color 0.3s; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
+        a { text-decoration: none; color: inherit; }
+
+        /* 헤더 */
+        header { background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: var(--accent-color); }
+        .nav-links a:hover { color: var(--accent-color); }
+
+        /* 메인 레이아웃 */
+        .mypage-container { max-width: 1000px; margin: 3rem auto; padding: 0 2rem; }
+        
+        /* 프로필 섹션 */
+        .profile-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+        .profile-avatar { width: 80px; height: 80px; background-color: var(--accent-color); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; }
+        .profile-info h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .profile-info p { opacity: 0.7; }
+
+        /* 내 작품 섹션 */
+        .section-title { font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 700; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+        .webtoon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
+        .webtoon-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; cursor: pointer; }
+        .webtoon-card:hover { border-color: var(--accent-color); }
+        .webtoon-thumbnail { width: 100%; height: 200px; background-color: #ddd; object-fit: cover; }
+        .webtoon-info { padding: 1rem; }
+        .webtoon-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 0.3rem; }
+        .empty-message { padding: 3rem; text-align: center; opacity: 0.7; grid-column: 1 / -1; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">노넴툰</a>
+        <div class="nav-links">
+            <a href="index.html">⬅️ 메인으로 돌아가기</a>
+        </div>
+    </header>
+
+    <main class="mypage-container">
+        <!-- 프로필 섹션 -->
+        <section class="profile-card">
+            <div class="profile-avatar" id="avatarChar">?</div>
+            <div class="profile-info">
+                <h2 id="profileName">로딩 중...</h2>
+                <p id="profileEmail">이메일 정보를 불러오는 중입니다.</p>
+            </div>
+        </section>
+
+        <!-- 내가 올린 작품 섹션 -->
+        <h2 class="section-title">📚 내가 연재 중인 작품</h2>
+        <div class="webtoon-grid" id="myWebtoonGrid">
+            <div class="empty-message">작품을 불러오는 중입니다... 🔄</div>
+        </div>
+    </main>
+
+    <!-- Firebase 로직 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc",
+            authDomain: "nonametoon-907aa.firebaseapp.com",
+            projectId: "nonametoon-907aa",
+            storageBucket: "nonametoon-907aa.firebasestorage.app",
+            messagingSenderId: "581148914100",
+            appId: "1:581148914100:web:03e65a96e29086eff682e1",
+            measurementId: "G-Q5P01H9MKZ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const myWebtoonGrid = document.getElementById('myWebtoonGrid');
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const avatarChar = document.getElementById('avatarChar');
+
+        // 로그인 상태 확인 및 내 작품 불러오기
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // 1. 프로필 정보 표시
+                const nickname = user.displayName || "무명작가";
+                profileName.innerText = `${nickname} 작가님`;
+                profileEmail.innerText = user.email;
+                avatarChar.innerText = nickname.charAt(0); // 닉네임 첫 글자를 아바타로
+
+                // 2. 내가 올린 작품만 필터링해서 가져오기 (where 조건문 사용)
+                try {
+                    const q = query(collection(db, "webtoons"), where("author_id", "==", user.uid));
+                    const querySnapshot = await getDocs(q);
+                    
+                    myWebtoonGrid.innerHTML = ''; // 로딩 메시지 삭제
+
+                    if (querySnapshot.empty) {
+                        myWebtoonGrid.innerHTML = '<div class="empty-message">아직 등록하신 작품이 없습니다.<br><br><a href="upload.html" style="color:var(--accent-color); font-weight:bold;">+ 첫 작품 올리러 가기</a></div>';
+                        return;
+                    }
+
+                    // 가져온 내 작품들을 화면에 출력
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const card = document.createElement('div');
+                        card.className = 'webtoon-card';
+                        
+                        card.innerHTML = `
+                            <img src="${data.thumbnail_url}" alt="썸네일" class="webtoon-thumbnail" onerror="this.src='https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image'">
+                            <div class="webtoon-info">
+                                <div class="webtoon-title">${data.title}</div>
+                                <div style="font-size:0.8rem; opacity:0.7; margin-top:5px;">장르: ${data.genre}</div>
+                            </div>
+                        `;
+                        
+                        // 작품 클릭 시 에피소드 관리/추가 페이지로 이동할 수 있도록 준비
+                        card.onclick = () => alert(`'${data.title}' 작품의 회차(에피소드) 관리 페이지로 이동합니다! (추후 구현)`);
+                        myWebtoonGrid.appendChild(card);
+                    });
+
+                } catch (error) {
+                    console.error("작품 불러오기 실패:", error);
+                    myWebtoonGrid.innerHTML = '<div class="empty-message">데이터를 불러오는 중 오류가 발생했습니다.</div>';
+                }
+
+            } else {
+                alert("로그인이 필요한 페이지입니다.");
+                window.location.href = "index.html";
+            }
+        });
+
+        // 테마 유지 스크립트
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+</body>
+</html>
