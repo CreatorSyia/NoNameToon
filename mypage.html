@@ -7,23 +7,12 @@
     <style>
         /* 기본 테마 변수 */
         :root {
-            --bg-color: #f8f9fa;
-            --text-color: #212529;
-            --header-bg: #ffffff;
-            --card-bg: #ffffff;
-            --border-color: #dee2e6;
-            --accent-color: #6366f1;
-            --accent-hover: #4f46e5;
+            --bg-color: #f8f9fa; --text-color: #212529; --header-bg: #ffffff; --card-bg: #ffffff;
+            --border-color: #dee2e6; --accent-color: #6366f1; --accent-hover: #4f46e5;
         }
-
         [data-theme="dark"] {
-            --bg-color: #121212;
-            --text-color: #e0e0e0;
-            --header-bg: #1e1e1e;
-            --card-bg: #2d2d2d;
-            --border-color: #404040;
-            --accent-color: #818cf8;
-            --accent-hover: #6366f1;
+            --bg-color: #121212; --text-color: #e0e0e0; --header-bg: #1e1e1e; --card-bg: #2d2d2d;
+            --border-color: #404040; --accent-color: #818cf8; --accent-hover: #6366f1;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.3s, color 0.3s; }
@@ -40,27 +29,25 @@
         
         /* 프로필 섹션 */
         .profile-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 3rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
+            background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;
+            padding: 2rem; margin-bottom: 3rem; display: flex; align-items: center; gap: 2rem;
         }
         .profile-avatar { width: 80px; height: 80px; background-color: var(--accent-color); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; }
         .profile-info h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
         .profile-info p { opacity: 0.7; }
 
-        /* 내 작품 섹션 */
-        .section-title { font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 700; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+        /* 작품 목록 섹션 */
+        .section-title { font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 700; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-top: 3rem; }
         .webtoon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
-        .webtoon-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; cursor: pointer; }
-        .webtoon-card:hover { border-color: var(--accent-color); }
-        .webtoon-thumbnail { width: 100%; height: 200px; background-color: #ddd; object-fit: cover; }
-        .webtoon-info { padding: 1rem; }
-        .webtoon-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 0.3rem; }
+        
+        /* 웹툰 카드 디자인 수정 (메인페이지와 동일하게 표지 가림 방지) */
+        .webtoon-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; }
+        .webtoon-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); border-color: var(--accent-color); }
+        .webtoon-thumbnail { width: 100%; height: 260px; background-color: #ddd; object-fit: cover; }
+        .webtoon-info { padding: 1.2rem; background-color: var(--card-bg); flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+        .webtoon-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 0.4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .webtoon-author { font-size: 0.9rem; opacity: 0.7; }
+
         .empty-message { padding: 3rem; text-align: center; opacity: 0.7; grid-column: 1 / -1; }
     </style>
 </head>
@@ -69,7 +56,7 @@
     <header>
         <a href="index.html" class="logo">노넴툰</a>
         <div class="nav-links">
-            <a href="index.html">⬅️ 메인으로 돌아가기</a>
+            <a href="index.html" style="font-weight: 600;">⬅️ 메인으로 돌아가기</a>
         </div>
     </header>
 
@@ -83,6 +70,18 @@
             </div>
         </section>
 
+        <!-- 감상 기록 섹션 -->
+        <h2 class="section-title">🕒 최근 본 작품</h2>
+        <div class="webtoon-grid" id="historyWebtoonGrid">
+            <div class="empty-message">감상 기록을 불러오는 중입니다... 🔄</div>
+        </div>
+
+        <!-- 관심 작품(좋아요) 섹션 -->
+        <h2 class="section-title">❤️ 관심 작품</h2>
+        <div class="webtoon-grid" id="likedWebtoonGrid">
+            <div class="empty-message">좋아요한 작품을 불러오는 중입니다... 🔄</div>
+        </div>
+
         <!-- 내가 올린 작품 섹션 -->
         <h2 class="section-title">📚 내가 연재 중인 작품</h2>
         <div class="webtoon-grid" id="myWebtoonGrid">
@@ -94,72 +93,124 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        // getDoc을 추가로 불러옵니다.
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc",
-            authDomain: "nonametoon-907aa.firebaseapp.com",
-            projectId: "nonametoon-907aa",
-            storageBucket: "nonametoon-907aa.firebasestorage.app",
-            messagingSenderId: "581148914100",
-            appId: "1:581148914100:web:03e65a96e29086eff682e1",
-            measurementId: "G-Q5P01H9MKZ"
+            apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc", authDomain: "nonametoon-907aa.firebaseapp.com",
+            projectId: "nonametoon-907aa", storageBucket: "nonametoon-907aa.firebasestorage.app",
+            messagingSenderId: "581148914100", appId: "1:581148914100:web:03e65a96e29086eff682e1", measurementId: "G-Q5P01H9MKZ"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        const historyWebtoonGrid = document.getElementById('historyWebtoonGrid');
+        const likedWebtoonGrid = document.getElementById('likedWebtoonGrid');
         const myWebtoonGrid = document.getElementById('myWebtoonGrid');
+        
         const profileName = document.getElementById('profileName');
         const profileEmail = document.getElementById('profileEmail');
         const avatarChar = document.getElementById('avatarChar');
 
-        // 로그인 상태 확인 및 내 작품 불러오기
+        // 웹툰 카드를 만드는 공통 함수 (표지 가림 방지 디자인 적용)
+        function createWebtoonCard(wtData, wtId, extraText = "") {
+            const card = document.createElement('div');
+            card.className = 'webtoon-card';
+            
+            const thumbUrl = wtData.thumbnail_url || 'https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image';
+            const authorName = wtData.author_nickname || wtData.author || '무명작가';
+            
+            // extraText가 있으면(예: n화 시청완료) 그걸 보여주고, 없으면 작가 이름 표시
+            const infoText = extraText ? extraText : `작가: ${authorName}`;
+
+            card.innerHTML = `
+                <img src="${thumbUrl}" alt="썸네일" class="webtoon-thumbnail" onerror="this.src='https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image'">
+                <div class="webtoon-info">
+                    <div class="webtoon-title">${wtData.title || '제목 없음'}</div>
+                    <div class="webtoon-author">${infoText}</div>
+                </div>
+            `;
+            
+            // 클릭 시 작품 상세 페이지로 이동
+            card.onclick = () => { window.location.href = `detail.html?id=${wtId}`; };
+            return card;
+        }
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // 1. 프로필 정보 표시
+                // 프로필 정보 세팅
                 const nickname = user.displayName || "무명작가";
-                profileName.innerText = `${nickname} 작가님`;
+                profileName.innerText = `${nickname}님`;
                 profileEmail.innerText = user.email;
-                avatarChar.innerText = nickname.charAt(0); // 닉네임 첫 글자를 아바타로
+                avatarChar.innerText = nickname.charAt(0);
 
-                // 2. 내가 올린 작품만 필터링해서 가져오기 (where 조건문 사용)
+                // --- 1. 내가 올린 작품 불러오기 ---
                 try {
-                    const q = query(collection(db, "webtoons"), where("author_id", "==", user.uid));
-                    const querySnapshot = await getDocs(q);
-                    
-                    myWebtoonGrid.innerHTML = ''; // 로딩 메시지 삭제
+                    const qMy = query(collection(db, "webtoons"), where("author_id", "==", user.uid));
+                    const snapMy = await getDocs(qMy);
+                    myWebtoonGrid.innerHTML = '';
 
-                    if (querySnapshot.empty) {
+                    if (snapMy.empty) {
                         myWebtoonGrid.innerHTML = '<div class="empty-message">아직 등록하신 작품이 없습니다.<br><br><a href="upload.html" style="color:var(--accent-color); font-weight:bold;">+ 첫 작품 올리러 가기</a></div>';
-                        return;
+                    } else {
+                        snapMy.forEach((docSnap) => {
+                            myWebtoonGrid.appendChild(createWebtoonCard(docSnap.data(), docSnap.id));
+                        });
                     }
+                } catch (e) { console.error(e); }
 
-                    // 가져온 내 작품들을 화면에 출력
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        const card = document.createElement('div');
-                        card.className = 'webtoon-card';
-                        
-                        card.innerHTML = `
-                            <img src="${data.thumbnail_url}" alt="썸네일" class="webtoon-thumbnail" onerror="this.src='https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image'">
-                            <div class="webtoon-info">
-                                <div class="webtoon-title">${data.title}</div>
-                                <div style="font-size:0.8rem; opacity:0.7; margin-top:5px;">장르: ${data.genre}</div>
-                            </div>
-                        `;
-                        
-                        // 작품 클릭 시 상세 페이지로 이동하도록 수정 완료!
-                        card.onclick = () => { window.location.href = `detail.html?id=${doc.id}`; };
-                        
-                        myWebtoonGrid.appendChild(card);
-                    });
+                // --- 2. 관심 작품(좋아요) 불러오기 ---
+                try {
+                    const qLike = query(collection(db, "likes"), where("user_id", "==", user.uid));
+                    const snapLike = await getDocs(qLike);
+                    likedWebtoonGrid.innerHTML = '';
 
-                } catch (error) {
-                    console.error("작품 불러오기 실패:", error);
-                    myWebtoonGrid.innerHTML = '<div class="empty-message">데이터를 불러오는 중 오류가 발생했습니다.</div>';
-                }
+                    if (snapLike.empty) {
+                        likedWebtoonGrid.innerHTML = '<div class="empty-message">아직 좋아요를 누른 작품이 없습니다.</div>';
+                    } else {
+                        // 좋아요 기록에서 웹툰 ID를 뽑아 실제 웹툰 데이터를 가져옵니다.
+                        snapLike.forEach(async (likeSnap) => {
+                            const likeData = likeSnap.data();
+                            const wtSnap = await getDoc(doc(db, "webtoons", likeData.webtoon_id));
+                            if (wtSnap.exists()) {
+                                likedWebtoonGrid.appendChild(createWebtoonCard(wtSnap.data(), wtSnap.id));
+                            }
+                        });
+                    }
+                } catch (e) { console.error(e); }
+
+                // --- 3. 최근 본 작품(감상 기록) 불러오기 ---
+                try {
+                    const qHist = query(collection(db, "history"), where("user_id", "==", user.uid));
+                    const snapHist = await getDocs(qHist);
+                    historyWebtoonGrid.innerHTML = '';
+
+                    if (snapHist.empty) {
+                        historyWebtoonGrid.innerHTML = '<div class="empty-message">최근 감상한 작품이 없습니다.</div>';
+                    } else {
+                        // 자바스크립트로 최신 시간순 정렬
+                        let histArray = [];
+                        snapHist.forEach(d => histArray.push(d.data()));
+                        
+                        histArray.sort((a, b) => {
+                            const timeA = a.last_viewed_at ? (a.last_viewed_at.toDate ? a.last_viewed_at.toDate().getTime() : new Date(a.last_viewed_at).getTime()) : 0;
+                            const timeB = b.last_viewed_at ? (b.last_viewed_at.toDate ? b.last_viewed_at.toDate().getTime() : new Date(b.last_viewed_at).getTime()) : 0;
+                            return timeB - timeA;
+                        });
+
+                        // 정렬된 순서대로 웹툰 정보 불러와서 그리기
+                        for (const histData of histArray) {
+                            const wtSnap = await getDoc(doc(db, "webtoons", histData.webtoon_id));
+                            if (wtSnap.exists()) {
+                                // 파란색 글씨로 몇 화까지 봤는지 표시
+                                const extraText = `<span style="color:var(--accent-color); font-weight:bold;">현재 ${histData.episode_number}화 감상</span>`;
+                                historyWebtoonGrid.appendChild(createWebtoonCard(wtSnap.data(), wtSnap.id, extraText));
+                            }
+                        }
+                    }
+                } catch (e) { console.error(e); }
 
             } else {
                 alert("로그인이 필요한 페이지입니다.");
@@ -167,7 +218,7 @@
             }
         });
 
-        // 테마 유지 스크립트
+        // 테마 유지
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
     </script>
