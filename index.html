@@ -480,7 +480,7 @@
                         createdAt: new Date().toISOString()
                     });
 
-                    alert(`환영합니다, ${nickname} 작가/독자님! 가입이 완료되었습니다.`);
+                    alert(`환영합니다, ${nickname}님! 가입이 완료되었습니다.`);
                 } else {
                     // Firebase Auth 로그인
                     await signInWithEmailAndPassword(auth, email, password);
@@ -531,7 +531,8 @@
                 alert('작품을 등록하려면 먼저 로그인이 필요합니다!');
                 openLoginModal();
             } else {
-                alert(`[작품 업로드 페이지]\n${currentUser.displayName || '작가'}님의 작품 등록 화면으로 이동합니다.`);
+                // upload.html 파일로 이동시킵니다!
+                window.location.href = 'upload.html';
             }
         });
     </script>
