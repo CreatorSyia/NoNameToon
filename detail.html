@@ -51,7 +51,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        // orderBy를 뺐습니다!
         import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -102,13 +101,15 @@
                         <div class="author">글/그림 : ${authorName}</div>
                         <div class="description">${descriptionStr}</div>
                         
-                        <div class="author-menu" id="authorMenu">
-                            <button class="btn-add-episode" id="addEpisodeBtn">+ 새 회차(에피소드) 올리기</button>
+                        <!-- 변경된 작가 메뉴 부분 (수정 버튼 추가) -->
+                        <div class="author-menu" id="authorMenu" style="display: flex; gap: 10px;">
+                            <button class="btn-add-episode" id="addEpisodeBtn">+ 새 회차 올리기</button>
+                            <button class="btn-add-episode" id="editWebtoonBtn" style="background-color: var(--border-color); color: var(--text-color);">✏️ 작품 수정</button>
                         </div>
                     </div>
                 `;
 
-                // 2. 에피소드 가져오기 (orderBy 에러 방지를 위해 where 조건만 사용)
+                // 2. 에피소드 가져오기
                 const epQuery = query(collection(db, "episodes"), where("webtoon_id", "==", webtoonId));
                 const epSnap = await getDocs(epQuery);
                 episodeList.innerHTML = '';
@@ -149,8 +150,15 @@
                 onAuthStateChanged(auth, (user) => {
                     if (user && user.uid === wtData.author_id) {
                         const authorMenu = document.getElementById('authorMenu');
-                        authorMenu.style.display = 'block';
-                        document.getElementById('addEpisodeBtn').onclick = () => { window.location.href = `upload_episode.html?webtoonId=${webtoonId}`; };
+                        authorMenu.style.display = 'flex'; // block에서 flex로 변경하여 버튼을 나란히 배치합니다.
+                        
+                        document.getElementById('addEpisodeBtn').onclick = () => { 
+                            window.location.href = `upload_episode.html?webtoonId=${webtoonId}`; 
+                        };
+                        // 작품 수정 버튼 이벤트 연결
+                        document.getElementById('editWebtoonBtn').onclick = () => { 
+                            window.location.href = `edit_webtoon.html?id=${webtoonId}`; 
+                        };
                     }
                 });
             } catch (error) {
