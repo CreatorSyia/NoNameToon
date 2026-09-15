@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>작품 올리기 - 노넴툰</title>
+    <style>
+        /* 기본 테마 변수 */
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --header-bg: #ffffff;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+            --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --header-bg: #1e1e1e;
+            --card-bg: #2d2d2d;
+            --border-color: #404040;
+            --accent-color: #818cf8;
+            --accent-hover: #6366f1;
+            --input-bg: #1e1e1e;
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /* 헤더 */
+        header {
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo { font-size: 1.5rem; font-weight: 800; color: var(--accent-color); }
+        .back-btn { font-weight: 600; cursor: pointer; color: var(--text-color); }
+
+        /* 업로드 폼 컨테이너 */
+        .upload-container {
+            max-width: 600px;
+            margin: 3rem auto;
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .upload-title {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 800;
+        }
+
+        .input-group { margin-bottom: 1.5rem; }
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .input-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .btn-submit:hover { background-color: var(--accent-hover); }
+        .btn-submit:disabled { background-color: var(--border-color); cursor: not-allowed; }
+
+        .help-text {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 0.3rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">노넴툰</a>
+        <a href="index.html" class="back-btn">⬅️ 메인으로 돌아가기</a>
+    </header>
+
+    <main class="upload-container">
+        <h2 class="upload-title">새 작품 등록하기</h2>
+        
+        <form id="uploadForm">
+            <div class="input-group">
+                <label for="title">웹툰 제목</label>
+                <input type="text" id="title" placeholder="작품의 제목을 입력해주세요" required>
+            </div>
+
+            <div class="input-group">
+                <label for="genre">장르</label>
+                <select id="genre" required>
+                    <option value="">장르를 선택해주세요</option>
+                    <option value="로맨스">로맨스</option>
+                    <option value="판타지">판타지</option>
+                    <option value="액션">액션</option>
+                    <option value="일상">일상</option>
+                    <option value="스릴러">스릴러</option>
+                    <option value="코미디">코미디</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="description">작품 줄거리</label>
+                <textarea id="description" placeholder="독자들의 흥미를 끌 수 있는 줄거리를 적어주세요." required></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="thumbnail">썸네일 이미지 URL</label>
+                <input type="url" id="thumbnail" placeholder="https://..." required>
+                <p class="help-text">※ 현재 버전에서는 이미지의 인터넷 주소(URL)를 입력해주세요. (예: 인터넷에 올라온 이미지 우클릭 -> 이미지 주소 복사)</p>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">작품 등록하기</button>
+        </form>
+    </main>
+
+    <!-- Firebase 설정 및 로직 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // 사용자 제공 Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc",
+            authDomain: "nonametoon-907aa.firebaseapp.com",
+            projectId: "nonametoon-907aa",
+            storageBucket: "nonametoon-907aa.firebasestorage.app",
+            messagingSenderId: "581148914100",
+            appId: "1:581148914100:web:03e65a96e29086eff682e1",
+            measurementId: "G-Q5P01H9MKZ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        const submitBtn = document.getElementById('submitBtn');
+
+        // 로그인 상태 확인
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                // 이전 테마 불러오기 (선택사항)
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else {
+                alert("로그인이 필요한 페이지입니다. 메인 화면으로 이동합니다.");
+                window.location.href = "index.html";
+            }
+        });
+
+        // 폼 제출 시 Firestore에 데이터 저장
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentUser) return;
+            
+            // 버튼 비활성화 (중복 클릭 방지)
+            submitBtn.disabled = true;
+            submitBtn.innerText = "등록 중...";
+
+            const title = document.getElementById('title').value;
+            const genre = document.getElementById('genre').value;
+            const description = document.getElementById('description').value;
+            const thumbnail = document.getElementById('thumbnail').value;
+
+            try {
+                // 'webtoons' 컬렉션에 새 데이터 추가
+                await addDoc(collection(db, "webtoons"), {
+                    title: title,
+                    genre: genre,
+                    description: description,
+                    thumbnail_url: thumbnail,
+                    author_id: currentUser.uid,
+                    author_nickname: currentUser.displayName || "무명작가",
+                    status: "ongoing", // 기본 연재 상태
+                    created_at: serverTimestamp() // 현재 시간 자동 기록
+                });
+
+                alert("작품이 성공적으로 등록되었습니다!");
+                window.location.href = "index.html"; // 등록 완료 후 메인으로 이동
+
+            } catch (error) {
+                console.error("업로드 에러:", error);
+                alert("등록 중 오류가 발생했습니다: " + error.message);
+                submitBtn.disabled = false;
+                submitBtn.innerText = "작품 등록하기";
+            }
+        });
+    </script>
+</body>
+</html>
