@@ -7,55 +7,56 @@
     <style>
         /* 기본 테마 변수 */
         :root {
-            --bg-color: #f8f9fa; --text-color: #212529; --header-bg: #ffffff; 
-            --border-color: #dee2e6; --accent-color: #6366f1;
+            --bg-color: #f8f9fa; --text-color: #212529; --header-bg: #ffffff; --card-bg: #ffffff;
+            --border-color: #dee2e6; --accent-color: #6366f1; --accent-hover: #4f46e5;
         }
         [data-theme="dark"] {
-            --bg-color: #121212; --text-color: #e0e0e0; --header-bg: #1e1e1e; 
-            --border-color: #404040; --accent-color: #818cf8;
+            --bg-color: #121212; --text-color: #e0e0e0; --header-bg: #1e1e1e; --card-bg: #2d2d2d;
+            --border-color: #404040; --accent-color: #818cf8; --accent-hover: #6366f1;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.3s, color 0.3s; }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); color: var(--text-color); }
         a { text-decoration: none; color: inherit; }
 
-        /* 뷰어 전용 헤더 (화면 스크롤 시에도 위에 고정됨) */
+        /* 헤더 */
         header { 
             background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); 
             padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center;
             position: sticky; top: 0; z-index: 100;
         }
-        
         .header-left { display: flex; align-items: center; gap: 1rem; }
         .back-btn { font-size: 1.2rem; font-weight: bold; cursor: pointer; color: var(--text-color); }
         .ep-info { font-weight: 700; font-size: 1.1rem; }
-        
         .theme-toggle-btn { background: none; border: 2px solid var(--border-color); color: var(--text-color); padding: 0.4rem 0.8rem; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
-        .theme-toggle-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
-
-        /* 이미지들이 들어갈 중앙 정렬 컨테이너 */
-        .viewer-container {
-            max-width: 800px; /* 웹툰 최대 너비 */
-            margin: 0 auto;
-            background-color: #fff; /* 이미지가 없는 배경은 흰색 고정 */
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
         
-        [data-theme="dark"] .viewer-container {
-            background-color: #000; /* 다크모드 시 웹툰 배경 검은색 */
-        }
-
-        /* 핵심! 이미지 사이의 틈을 없애고 꽉 차게 만듭니다 */
-        .viewer-img {
-            width: 100%;
-            display: block; /* 이미지 아래쪽 여백 제거 */
-            border: none;
-        }
-
+        /* 뷰어 영역 */
+        .viewer-container { max-width: 800px; margin: 0 auto; background-color: #fff; min-height: 80vh; display: flex; flex-direction: column; align-items: center; }
+        [data-theme="dark"] .viewer-container { background-color: #000; }
+        .viewer-img { width: 100%; display: block; border: none; }
         .loading-message { padding: 5rem; text-align: center; font-size: 1.2rem; opacity: 0.7; }
+
+        /* 댓글 영역 */
+        .comment-section { max-width: 800px; margin: 0 auto; padding: 2rem; background-color: var(--card-bg); border-top: 1px solid var(--border-color); }
+        .comment-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 1rem; }
+        
+        /* 댓글 입력 폼 */
+        .comment-form { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; background-color: var(--bg-color); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); }
+        .comment-form textarea { width: 100%; height: 80px; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--card-bg); color: var(--text-color); font-family: inherit; resize: none; font-size: 0.95rem; }
+        .comment-form textarea:focus { outline: none; border-color: var(--accent-color); }
+        .comment-submit-btn { align-self: flex-end; background-color: var(--accent-color); color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .comment-submit-btn:hover { background-color: var(--accent-hover); }
+        .comment-submit-btn:disabled { background-color: var(--border-color); cursor: not-allowed; }
+
+        /* 댓글 목록 */
+        .comment-list { display: flex; flex-direction: column; gap: 1rem; }
+        .comment-item { padding: 1rem; border-bottom: 1px solid var(--border-color); }
+        .comment-item:last-child { border-bottom: none; }
+        .comment-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .comment-author { font-weight: bold; color: var(--accent-color); }
+        .comment-date { opacity: 0.6; }
+        .comment-body { font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; }
+        .empty-comment { text-align: center; padding: 2rem; opacity: 0.6; }
     </style>
 </head>
 <body>
@@ -72,9 +73,24 @@
         <div class="loading-message">웹툰 이미지를 불러오는 중입니다... 🔄</div>
     </main>
 
+    <!-- 댓글 섹션 추가 -->
+    <section class="comment-section">
+        <div class="comment-title">💬 댓글 (<span id="commentCount">0</span>)</div>
+        
+        <form class="comment-form" id="commentForm">
+            <textarea id="commentInput" placeholder="바른 말 고운 말을 사용해주세요. (로그인 후 작성 가능)" required></textarea>
+            <button type="submit" class="comment-submit-btn" id="commentBtn">댓글 등록</button>
+        </form>
+
+        <div class="comment-list" id="commentList">
+            <div class="empty-comment">댓글을 불러오는 중입니다...</div>
+        </div>
+    </section>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc",
@@ -87,25 +103,43 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // URL에서 회차 ID(epId) 가져오기
         const urlParams = new URLSearchParams(window.location.search);
         const epId = urlParams.get('epId');
 
         const viewerContainer = document.getElementById('viewerContainer');
         const epTitleDisplay = document.getElementById('epTitleDisplay');
         const backBtn = document.getElementById('backBtn');
+        
+        const commentForm = document.getElementById('commentForm');
+        const commentInput = document.getElementById('commentInput');
+        const commentBtn = document.getElementById('commentBtn');
+        const commentList = document.getElementById('commentList');
+        const commentCountDisplay = document.getElementById('commentCount');
 
-        async function loadViewer() {
-            if (!epId) {
-                alert("잘못된 접근입니다.");
-                window.location.href = "index.html";
-                return;
+        let currentUser = null;
+
+        // 로그인 상태 확인
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (!user) {
+                commentInput.placeholder = "로그인 후 댓글을 작성할 수 있습니다.";
+                commentInput.disabled = true;
+                commentBtn.disabled = true;
+            } else {
+                commentInput.placeholder = "바른 말 고운 말을 사용해주세요.";
+                commentInput.disabled = false;
+                commentBtn.disabled = false;
             }
+        });
+
+        // 웹툰 뷰어 로딩 함수
+        async function loadViewer() {
+            if (!epId) { alert("잘못된 접근입니다."); window.location.href = "index.html"; return; }
 
             try {
-                // 데이터베이스에서 해당 회차 데이터 1개 쏙 뽑아오기
                 const epRef = doc(db, "episodes", epId);
                 const epSnap = await getDoc(epRef);
 
@@ -116,30 +150,23 @@
                 }
 
                 const epData = epSnap.data();
-                
-                // 상단 헤더에 제목 표시
                 epTitleDisplay.innerText = `${epData.episode_number}화 - ${epData.title}`;
-
-                // 뒤로가기 버튼을 해당 웹툰의 상세 페이지로 연결
                 backBtn.href = `detail.html?id=${epData.webtoon_id}`;
+                viewerContainer.innerHTML = '';
 
-                viewerContainer.innerHTML = ''; // 로딩 메시지 지우기
-
-                // 이미지 URL 배열을 돌면서 img 태그 만들어서 붙이기
                 if (epData.content_images && epData.content_images.length > 0) {
                     epData.content_images.forEach((url) => {
                         const imgEl = document.createElement('img');
-                        imgEl.src = url;
-                        imgEl.className = 'viewer-img';
-                        imgEl.alt = "웹툰 컷";
-                        // 이미지가 깨질 경우 안내 이미지 표시
+                        imgEl.src = url; imgEl.className = 'viewer-img'; imgEl.alt = "웹툰 컷";
                         imgEl.onerror = () => { imgEl.src = 'https://via.placeholder.com/800x600/cccccc/ffffff?text=Image+Load+Error'; };
-                        
                         viewerContainer.appendChild(imgEl);
                     });
                 } else {
                     viewerContainer.innerHTML = '<div class="loading-message">등록된 이미지가 없습니다.</div>';
                 }
+                
+                // 웹툰 로딩 완료 후 댓글 불러오기 시작
+                loadComments();
 
             } catch (error) {
                 console.error("웹툰 로딩 오류:", error);
@@ -147,10 +174,75 @@
             }
         }
 
+        // 실시간 댓글 불러오기 함수 (onSnapshot 사용)
+        function loadComments() {
+            const q = query(collection(db, "comments"), where("episode_id", "==", epId), orderBy("created_at", "desc"));
+            
+            // onSnapshot은 데이터베이스에 변화가 생길 때마다 화면을 자동으로 새로고침해줍니다.
+            onSnapshot(q, (snapshot) => {
+                commentList.innerHTML = '';
+                commentCountDisplay.innerText = snapshot.size;
+
+                if (snapshot.empty) {
+                    commentList.innerHTML = '<div class="empty-comment">첫 번째 댓글을 남겨보세요!</div>';
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    let dateStr = '방금 전';
+                    if (data.created_at) {
+                        const d = data.created_at.toDate ? data.created_at.toDate() : new Date(data.created_at);
+                        dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    }
+
+                    const commentItem = document.createElement('div');
+                    commentItem.className = 'comment-item';
+                    commentItem.innerHTML = `
+                        <div class="comment-header">
+                            <span class="comment-author">${data.nickname}</span>
+                            <span class="comment-date">${dateStr}</span>
+                        </div>
+                        <div class="comment-body">${data.content}</div>
+                    `;
+                    commentList.appendChild(commentItem);
+                });
+            });
+        }
+
+        // 댓글 등록 버튼 이벤트
+        commentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser || !epId) return;
+
+            const content = commentInput.value.trim();
+            if (!content) return;
+
+            commentBtn.disabled = true;
+            commentBtn.innerText = "등록 중...";
+
+            try {
+                await addDoc(collection(db, "comments"), {
+                    episode_id: epId,
+                    user_id: currentUser.uid,
+                    nickname: currentUser.displayName || "무명독자",
+                    content: content,
+                    created_at: serverTimestamp()
+                });
+
+                commentInput.value = ''; // 입력창 비우기
+            } catch (error) {
+                console.error("댓글 등록 오류:", error);
+                alert("댓글을 등록하지 못했습니다.");
+            } finally {
+                commentBtn.disabled = false;
+                commentBtn.innerText = "댓글 등록";
+            }
+        });
+
         loadViewer();
     </script>
     
-    <!-- 뷰어 테마 토글 로직 -->
     <script>
         const htmlEl = document.documentElement;
         const themeBtn = document.getElementById('themeToggle');
