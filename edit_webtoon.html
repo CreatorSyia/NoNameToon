@@ -20,9 +20,16 @@
         .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--input-bg); color: var(--text-color); font-size: 1rem; font-family: inherit; }
         .input-group textarea { resize: vertical; min-height: 120px; }
         .input-group input:focus, .input-group select:focus, .input-group textarea:focus { outline: none; border-color: var(--accent-color); }
-        .btn-submit { width: 100%; padding: 1rem; background-color: var(--accent-color); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 1rem; }
+        
+        /* 버튼 스타일 수정 (나란히 배치) */
+        .button-group { display: flex; gap: 10px; margin-top: 1rem; }
+        .btn-submit { flex: 1; padding: 1rem; background-color: var(--accent-color); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
         .btn-submit:hover { background-color: var(--accent-hover); }
         .btn-submit:disabled { background-color: var(--border-color); cursor: not-allowed; }
+        
+        /* 삭제 버튼 전용 스타일 */
+        .btn-delete { flex: 1; padding: 1rem; background-color: #ef4444; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+        .btn-delete:hover { background-color: #dc2626; }
     </style>
 </head>
 <body>
@@ -63,15 +70,18 @@
                 <input type="url" id="thumbnail" required>
             </div>
 
-            <button type="submit" class="btn-submit" id="submitBtn">수정 완료</button>
+            <div class="button-group">
+                <button type="submit" class="btn-submit" id="submitBtn">수정 완료</button>
+                <button type="button" class="btn-delete" id="deleteBtn">작품 삭제</button>
+            </div>
         </form>
     </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        // updateDoc을 가져옵니다. (기존 데이터를 덮어쓰는 용도)
-        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        // deleteDoc을 추가로 가져옵니다!
+        import { getFirestore, doc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc", authDomain: "nonametoon-907aa.firebaseapp.com",
@@ -88,6 +98,7 @@
         const descInput = document.getElementById('description');
         const thumbInput = document.getElementById('thumbnail');
         const submitBtn = document.getElementById('submitBtn');
+        const deleteBtn = document.getElementById('deleteBtn');
 
         let currentUser = null;
 
@@ -100,14 +111,12 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     
-                    // 작성자 본인인지 체크
                     if (currentUser.uid !== data.author_id) {
-                        alert("수정 권한이 없습니다.");
+                        alert("권한이 없습니다.");
                         window.history.back();
                         return;
                     }
 
-                    // 폼에 기존 데이터 채우기
                     titleInput.value = data.title || "";
                     genreInput.value = data.genre || "판타지";
                     descInput.value = data.description || "";
@@ -131,7 +140,7 @@
             }
         });
 
-        // 2. 수정된 데이터 저장(덮어쓰기)
+        // 2. 수정된 데이터 저장
         document.getElementById('editForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUser || !webtoonId) return;
@@ -140,7 +149,6 @@
             submitBtn.innerText = "수정 중...";
 
             try {
-                // updateDoc은 기존 문서를 완전히 새로 만들지 않고, 명시한 항목만 변경해줍니다.
                 await updateDoc(doc(db, "webtoons", webtoonId), {
                     title: titleInput.value,
                     genre: genreInput.value,
@@ -155,6 +163,33 @@
                 alert("수정 중 오류가 발생했습니다.");
                 submitBtn.disabled = false;
                 submitBtn.innerText = "수정 완료";
+            }
+        });
+
+        // 3. 작품 삭제 기능
+        deleteBtn.addEventListener('click', async () => {
+            if (!currentUser || !webtoonId) return;
+
+            // 사용자에게 한 번 더 확인받기
+            const isConfirm = confirm("정말 이 작품을 삭제하시겠습니까?\n한 번 삭제하면 되돌릴 수 없습니다.");
+            
+            if (isConfirm) {
+                deleteBtn.disabled = true;
+                deleteBtn.innerText = "삭제 중...";
+                
+                try {
+                    // 데이터베이스에서 문서 삭제
+                    await deleteDoc(doc(db, "webtoons", webtoonId));
+                    alert("작품이 성공적으로 삭제되었습니다.");
+                    
+                    // 삭제 후에는 마이페이지 또는 메인 화면으로 이동
+                    window.location.href = "mypage.html";
+                } catch (error) {
+                    console.error("삭제 에러:", error);
+                    alert("삭제 중 오류가 발생했습니다.");
+                    deleteBtn.disabled = false;
+                    deleteBtn.innerText = "작품 삭제";
+                }
             }
         });
 
