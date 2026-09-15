@@ -14,7 +14,7 @@
         header { background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .header-left { display: flex; align-items: center; gap: 1rem; }
         .back-btn { font-size: 1.2rem; font-weight: bold; cursor: pointer; color: var(--text-color); }
-        .ep-info { font-weight: 700; font-size: 1.1rem; }
+        .ep-info { font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; }
         .theme-toggle-btn { background: none; border: 2px solid var(--border-color); color: var(--text-color); padding: 0.4rem 0.8rem; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
         
         .viewer-container { max-width: 800px; margin: 0 auto; background-color: #fff; min-height: 80vh; display: flex; flex-direction: column; align-items: center; }
@@ -40,7 +40,6 @@
         .comment-body { font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; }
         .empty-comment { text-align: center; padding: 2rem; opacity: 0.6; }
         
-        /* 댓글 액션 버튼 (수정, 삭제) */
         .comment-actions { display: flex; gap: 0.5rem; }
         .action-btn { background: none; border: none; font-size: 0.8rem; color: var(--text-color); opacity: 0.6; cursor: pointer; padding: 0.2rem; }
         .action-btn:hover { opacity: 1; color: var(--accent-color); }
@@ -75,7 +74,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        // updateDoc과 deleteDoc을 추가로 불러옵니다.
         import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, deleteDoc, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -99,6 +97,7 @@
         const commentCountDisplay = document.getElementById('commentCount');
 
         let currentUser = null;
+        let isViewerLoaded = false;
 
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
@@ -109,8 +108,12 @@
                 commentInput.placeholder = "바른 말 고운 말을 사용해주세요.";
                 commentInput.disabled = false; commentBtn.disabled = false;
             }
-            // 유저 상태가 변하면 댓글 UI(수정/삭제 버튼 등)를 다시 그리기 위해 한 번 호출할 수 있지만, 
-            // 실시간 리스너가 돌고 있으므로 새 댓글 작성 시 자동으로 반영됩니다.
+            
+            // 로그인 정보를 확인한 직후에 뷰어를 로드하여 권한 버튼이 정확히 뜨도록 개선
+            if (!isViewerLoaded) {
+                isViewerLoaded = true;
+                loadViewer();
+            }
         });
 
         async function loadViewer() {
@@ -125,6 +128,21 @@
                 const epData = epSnap.data();
                 epTitleDisplay.innerText = `${epData.episode_number}화 - ${epData.title}`;
                 backBtn.href = `detail.html?id=${epData.webtoon_id}`;
+                
+                // ===== 작가일 경우 에피소드 수정 버튼 띄우기 =====
+                const webtoonSnap = await getDoc(doc(db, "webtoons", epData.webtoon_id));
+                if (webtoonSnap.exists()) {
+                    const wtData = webtoonSnap.data();
+                    if (currentUser && currentUser.uid === wtData.author_id) {
+                        const editEpBtn = document.createElement('a');
+                        editEpBtn.href = `edit_episode.html?epId=${epId}`;
+                        editEpBtn.innerText = "✏️ 회차 수정";
+                        editEpBtn.style.cssText = "font-size: 0.8rem; margin-left: 10px; background: var(--border-color); padding: 4px 8px; border-radius: 4px; color: var(--text-color);";
+                        epTitleDisplay.appendChild(editEpBtn);
+                    }
+                }
+                // ============================================
+
                 viewerContainer.innerHTML = '';
 
                 if (epData.content_images && epData.content_images.length > 0) {
@@ -174,13 +192,11 @@
                         dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
                     }
 
-                    // 현재 로그인한 사용자가 작성한 댓글인지 확인
                     const isMyComment = currentUser && currentUser.uid === data.user_id;
 
                     const commentItem = document.createElement('div');
                     commentItem.className = 'comment-item';
                     
-                    // 내 댓글이면 수정/삭제 버튼을 그립니다.
                     const actionHtml = isMyComment ? `
                         <div class="comment-actions">
                             <button class="action-btn edit-btn">수정</button>
@@ -199,27 +215,19 @@
                         <div class="comment-body" id="body-${data.id}">${data.content}</div>
                     `;
                     
-                    // 수정, 삭제 이벤트 리스너 달기 (내 댓글일 때만)
                     if (isMyComment) {
                         const editBtn = commentItem.querySelector('.edit-btn');
                         const deleteBtn = commentItem.querySelector('.delete-btn');
                         const bodyDiv = commentItem.querySelector('.comment-body');
                         
-                        // 삭제 기능
                         deleteBtn.addEventListener('click', async () => {
                             if(confirm("이 댓글을 정말 삭제하시겠습니까?")) {
-                                try {
-                                    await deleteDoc(doc(db, "comments", data.id));
-                                } catch (e) {
-                                    alert("삭제에 실패했습니다.");
-                                }
+                                try { await deleteDoc(doc(db, "comments", data.id)); } catch (e) { alert("삭제에 실패했습니다."); }
                             }
                         });
 
-                        // 수정 기능
                         editBtn.addEventListener('click', () => {
                             const currentText = data.content;
-                            // 수정 모드로 UI 변경
                             bodyDiv.innerHTML = `
                                 <textarea class="edit-textarea">${currentText}</textarea>
                                 <div style="text-align:right;">
@@ -232,27 +240,14 @@
                             const cancelBtn = bodyDiv.querySelector('.cancel-btn');
                             const textarea = bodyDiv.querySelector('.edit-textarea');
 
-                            // 저장 버튼
                             saveBtn.addEventListener('click', async () => {
                                 const newText = textarea.value.trim();
-                                if(!newText) {
-                                    alert("내용을 입력해주세요.");
-                                    return;
-                                }
-                                try {
-                                    await updateDoc(doc(db, "comments", data.id), {
-                                        content: newText
-                                    });
-                                    // onSnapshot이 작동하여 자동으로 UI가 원래대로 갱신됩니다.
-                                } catch(e) {
-                                    alert("수정에 실패했습니다.");
-                                }
+                                if(!newText) { alert("내용을 입력해주세요."); return; }
+                                try { await updateDoc(doc(db, "comments", data.id), { content: newText }); } 
+                                catch(e) { alert("수정에 실패했습니다."); }
                             });
 
-                            // 취소 버튼
-                            cancelBtn.addEventListener('click', () => {
-                                bodyDiv.innerText = currentText; // 원래 텍스트로 복구
-                            });
+                            cancelBtn.addEventListener('click', () => { bodyDiv.innerText = currentText; });
                         });
                     }
                     
@@ -279,7 +274,6 @@
             finally { commentBtn.disabled = false; commentBtn.innerText = "댓글 등록"; }
         });
 
-        loadViewer();
     </script>
     <script>
         const htmlEl = document.documentElement; const themeBtn = document.getElementById('themeToggle');
