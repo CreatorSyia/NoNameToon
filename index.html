@@ -32,302 +32,93 @@
         }
 
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            margin: 0; padding: 0; box-sizing: border-box;
             transition: background-color 0.3s, color 0.3s, border-color 0.3s;
         }
 
         body {
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
+            background-color: var(--bg-color); color: var(--text-color); line-height: 1.6;
         }
 
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
+        a { text-decoration: none; color: inherit; }
 
         /* 헤더 */
-        header {
-            background-color: var(--header-bg);
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--accent-color);
-        }
-
-        .logo span {
-            font-size: 0.9rem;
-            font-weight: 400;
-            color: var(--text-color);
-            margin-left: 10px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent-color);
-        }
-        
-        .auth-btn {
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .user-greeting {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--accent-color);
-        }
-
-        .theme-toggle-btn {
-            background: none;
-            border: 2px solid var(--border-color);
-            color: var(--text-color);
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-
-        .theme-toggle-btn:hover {
-            border-color: var(--accent-color);
-            color: var(--accent-color);
-        }
+        header { background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
+        .nav-container { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: var(--accent-color); }
+        .logo span { font-size: 0.9rem; font-weight: 400; color: var(--text-color); margin-left: 10px; }
+        .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+        .nav-links a:hover { color: var(--accent-color); }
+        .auth-btn { font-weight: 700; cursor: pointer; }
+        .user-greeting { font-size: 0.95rem; font-weight: 600; color: var(--accent-color); }
+        .theme-toggle-btn { background: none; border: 2px solid var(--border-color); color: var(--text-color); padding: 0.4rem 0.8rem; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+        .theme-toggle-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
 
         /* 메인 배너 */
-        .hero {
-            text-align: center;
-            padding: 4rem 2rem;
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-        }
-
+        .hero { text-align: center; padding: 4rem 2rem; background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); }
         .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
         .hero p { font-size: 1.1rem; margin-bottom: 2rem; opacity: 0.8; }
-
-        .btn-upload {
-            background-color: var(--accent-color);
-            color: white;
-            padding: 0.8rem 2rem;
-            border: none;
-            border-radius: 30px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
+        .btn-upload { background-color: var(--accent-color); color: white; padding: 0.8rem 2rem; border: none; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-upload:hover { background-color: var(--accent-hover); }
 
         /* 웹툰 목록 */
-        .webtoon-section {
-            max-width: 1200px;
-            margin: 3rem auto;
-            padding: 0 2rem;
-        }
-
+        .webtoon-section { max-width: 1200px; margin: 3rem auto; padding: 0 2rem; }
         .section-title { font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 700; }
-        .webtoon-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .webtoon-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
+        .webtoon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
+        .webtoon-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; cursor: pointer; }
         .webtoon-card:hover { border-color: var(--accent-color); }
         .webtoon-thumbnail { width: 100%; height: 200px; background-color: #ddd; object-fit: cover; }
         .webtoon-info { padding: 1rem; }
         .webtoon-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 0.3rem; }
         .webtoon-author { font-size: 0.9rem; opacity: 0.7; }
+        .empty-message { text-align: center; grid-column: 1 / -1; padding: 3rem; opacity: 0.7; }
 
         /* 모달 창 */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--modal-overlay);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--modal-overlay); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; transform: translateY(-20px); transition: transform 0.3s ease-out; border: 1px solid var(--border-color); }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; background: none; border: none; color: var(--text-color); cursor: pointer; }
+        .modal-content h2 { margin-bottom: 1.5rem; text-align: center; color: var(--accent-color); }
+        .input-group { margin-bottom: 1rem; }
+        .input-group label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: bold; }
+        .input-group input { width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--input-bg); color: var(--text-color); font-size: 1rem; }
+        .input-group input:focus { outline: none; border-color: var(--accent-color); }
+        .btn-submit { width: 100%; padding: 0.8rem; background-color: var(--accent-color); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 1rem; }
+        .btn-submit:hover { background-color: var(--accent-hover); }
+        .modal-footer { margin-top: 1.5rem; text-align: center; font-size: 0.9rem; }
+        .modal-footer a { color: var(--accent-color); font-weight: 600; cursor: pointer; }
 
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-content {
-            background-color: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            position: relative;
-            transform: translateY(-20px);
-            transition: transform 0.3s ease-out;
-            border: 1px solid var(--border-color);
-        }
-
-        .modal-overlay.active .modal-content {
-            transform: translateY(0);
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 15px; right: 20px;
-            font-size: 1.5rem;
-            background: none; border: none;
-            color: var(--text-color);
-            cursor: pointer;
-        }
-
-        .modal-content h2 {
-            margin-bottom: 1.5rem;
-            text-align: center;
-            color: var(--accent-color);
-        }
-
-        .input-group {
-            margin-bottom: 1rem;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background-color: var(--input-bg);
-            color: var(--text-color);
-            font-size: 1rem;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: var(--accent-color);
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 0.8rem;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 1rem;
-        }
-
-        .btn-submit:hover {
-            background-color: var(--accent-hover);
-        }
-
-        .modal-footer {
-            margin-top: 1.5rem;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        .modal-footer a {
-            color: var(--accent-color);
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        footer {
-            background-color: var(--card-bg);
-            border-top: 1px solid var(--border-color);
-            text-align: center;
-            padding: 2rem;
-            margin-top: 4rem;
-        }
+        footer { background-color: var(--card-bg); border-top: 1px solid var(--border-color); text-align: center; padding: 2rem; margin-top: 4rem; }
     </style>
 </head>
 <body>
 
-    <!-- 헤더 -->
     <header>
         <div class="nav-container">
             <a href="#" class="logo">노넴툰 <span>무명 작가들의 웹툰</span></a>
             <nav class="nav-links">
                 <a href="#">연재작</a>
                 <a href="#">베스트</a>
-                
-                <!-- 인증 상태에 따라 변경되는 영역 -->
                 <span id="userGreeting" class="user-greeting" style="display: none;"></span>
                 <a href="javascript:void(0)" id="authActionBtn" class="auth-btn" onclick="openLoginModal()">로그인</a>
-                
                 <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()">🌙 다크 모드</button>
             </nav>
         </div>
     </header>
 
-    <!-- 메인 배너 -->
     <section class="hero">
         <h1>누구나 웹툰 작가가 될 수 있는 곳</h1>
         <p>당신의 머릿속에만 있던 이야기, 이제 '노넴툰'에서 마음껏 펼쳐보세요.</p>
         <button class="btn-upload" id="heroUploadBtn">✏️ 내 작품 올리기</button>
     </section>
 
-    <!-- 실시간 웹툰 목록 -->
     <main class="webtoon-section">
         <h2 class="section-title">✨ 새로 올라온 작품</h2>
-        <div class="webtoon-grid">
-            <div class="webtoon-card">
-                <img src="https://via.placeholder.com/300x400/6366f1/ffffff?text=Webtoon+1" alt="웹툰" class="webtoon-thumbnail">
-                <div class="webtoon-info"><div class="webtoon-title">달빛 아래 그림자</div><div class="webtoon-author">작가: 무명A</div></div>
-            </div>
-            <div class="webtoon-card">
-                <img src="https://via.placeholder.com/300x400/6366f1/ffffff?text=Webtoon+2" alt="웹툰" class="webtoon-thumbnail">
-                <div class="webtoon-info"><div class="webtoon-title">오늘부터 마법사</div><div class="webtoon-author">작가: 글쟁이</div></div>
-            </div>
-            <div class="webtoon-card">
-                <img src="https://via.placeholder.com/300x400/6366f1/ffffff?text=Webtoon+3" alt="웹툰" class="webtoon-thumbnail">
-                <div class="webtoon-info"><div class="webtoon-title">용사의 은퇴 라이프</div><div class="webtoon-author">작가: 백수용사</div></div>
-            </div>
+        <!-- 자바스크립트가 여기에 진짜 웹툰을 채워넣을 겁니다 -->
+        <div class="webtoon-grid" id="webtoonGrid">
+            <div class="empty-message">작품을 불러오는 중입니다... 🔄</div>
         </div>
     </main>
 
@@ -336,14 +127,11 @@
         <div class="modal-content">
             <button class="close-btn" onclick="closeAuthModal()">&times;</button>
             <h2 id="modalTitle">로그인</h2>
-            
             <form id="authForm">
-                <!-- 닉네임 필드 (회원가입 모드일 때만 표시) -->
                 <div class="input-group" id="nicknameGroup" style="display: none;">
                     <label for="nickname">작가/독자 닉네임</label>
                     <input type="text" id="nickname" placeholder="사용할 닉네임을 입력하세요">
                 </div>
-
                 <div class="input-group">
                     <label for="email">이메일</label>
                     <input type="email" id="email" placeholder="example@email.com" required>
@@ -352,10 +140,8 @@
                     <label for="password">비밀번호</label>
                     <input type="password" id="password" placeholder="6자리 이상 비밀번호" required>
                 </div>
-
                 <button type="submit" class="btn-submit" id="submitBtn">로그인하기</button>
             </form>
-
             <div class="modal-footer">
                 <span id="switchPrompt">아직 계정이 없으신가요?</span>
                 <a href="javascript:void(0)" id="switchModeBtn" onclick="toggleAuthMode()">회원가입</a>
@@ -363,30 +149,17 @@
         </div>
     </div>
 
-    <!-- 푸터 -->
     <footer>
         <p>&copy; 2026 노넴툰(No Name Toon). All rights reserved.</p>
     </footer>
 
-    <!-- Firebase SDK (모듈 방식) -->
+    <!-- Firebase SDK & 메인 로직 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { 
-            getAuth, 
-            createUserWithEmailAndPassword, 
-            signInWithEmailAndPassword, 
-            signOut, 
-            onAuthStateChanged,
-            updateProfile 
-        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            setDoc,
-            getDoc 
-        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        // 데이터를 불러오기 위한 함수들 추가 (getDocs, collection, query, orderBy)
+        import { getFirestore, doc, setDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // 사용자 제공 Firebase 설정
         const firebaseConfig = {
             apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc",
             authDomain: "nonametoon-907aa.firebaseapp.com",
@@ -397,12 +170,10 @@
             measurementId: "G-Q5P01H9MKZ"
         };
 
-        // Firebase 초기화
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // UI 요소
         const authModal = document.getElementById('authModal');
         const modalTitle = document.getElementById('modalTitle');
         const nicknameGroup = document.getElementById('nicknameGroup');
@@ -415,146 +186,112 @@
         const authActionBtn = document.getElementById('authActionBtn');
         const userGreeting = document.getElementById('userGreeting');
         const heroUploadBtn = document.getElementById('heroUploadBtn');
+        const webtoonGrid = document.getElementById('webtoonGrid');
 
         let isSignUpMode = false;
         let currentUser = null;
 
-        // 모달 열기/닫기
-        window.openLoginModal = function() {
-            authModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        };
+        // 1. 진짜 웹툰 데이터 불러오기 함수
+        async function loadWebtoons() {
+            try {
+                // 'webtoons' 컬렉션에서 최신순(created_at 내림차순)으로 데이터 가져오기
+                const q = query(collection(db, "webtoons"), orderBy("created_at", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                webtoonGrid.innerHTML = ''; // 로딩 메시지 지우기
 
-        window.closeAuthModal = function() {
-            authModal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        };
+                if (querySnapshot.empty) {
+                    webtoonGrid.innerHTML = '<div class="empty-message">아직 등록된 작품이 없습니다. 첫 작품의 주인공이 되어보세요!</div>';
+                    return;
+                }
 
-        window.closeOnOutsideClick = function(event) {
-            if (event.target === authModal) {
-                closeAuthModal();
+                // 가져온 데이터들을 하나씩 카드로 만들어서 화면에 붙이기
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const card = document.createElement('div');
+                    card.className = 'webtoon-card';
+                    
+                    // 썸네일 이미지가 깨질 경우를 대비해 onerror 속성 추가
+                    card.innerHTML = `
+                        <img src="${data.thumbnail_url}" alt="웹툰" class="webtoon-thumbnail" onerror="this.src='https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image'">
+                        <div class="webtoon-info">
+                            <div class="webtoon-title">${data.title}</div>
+                            <div class="webtoon-author">작가: ${data.author_nickname}</div>
+                        </div>
+                    `;
+                    
+                    // 작품 클릭 시 상세 페이지로 이동 (아직 안 만들었지만 준비!)
+                    card.onclick = () => alert(`'${data.title}' 상세 페이지로 이동합니다! (다음 단계에서 만들 예정입니다)`);
+                    
+                    webtoonGrid.appendChild(card);
+                });
+            } catch (error) {
+                console.error("작품 불러오기 실패:", error);
+                webtoonGrid.innerHTML = '<div class="empty-message">작품을 불러오는데 실패했습니다. 데이터베이스 권한을 확인해주세요.</div>';
             }
-        };
+        }
 
-        // 로그인 <-> 회원가입 모드 전환
-        window.toggleAuthMode = function() {
+        // 페이지가 켜지자마자 웹툰 로드!
+        loadWebtoons();
+
+        // [아래는 기존과 동일한 로그인/회원가입 로직]
+        window.openLoginModal = () => { authModal.classList.add('active'); document.body.style.overflow = 'hidden'; };
+        window.closeAuthModal = () => { authModal.classList.remove('active'); document.body.style.overflow = 'auto'; };
+        window.closeOnOutsideClick = (e) => { if (e.target === authModal) closeAuthModal(); };
+        window.toggleAuthMode = () => {
             isSignUpMode = !isSignUpMode;
             if (isSignUpMode) {
-                modalTitle.innerText = "노넴툰 회원가입";
-                nicknameGroup.style.display = "block";
-                nicknameInput.required = true;
-                submitBtn.innerText = "가입 완료하기";
-                switchPrompt.innerText = "이미 계정이 있으신가요?";
-                switchModeBtn.innerText = "로그인";
+                modalTitle.innerText = "노넴툰 회원가입"; nicknameGroup.style.display = "block"; nicknameInput.required = true; submitBtn.innerText = "가입 완료하기"; switchPrompt.innerText = "이미 계정이 있으신가요?"; switchModeBtn.innerText = "로그인";
             } else {
-                modalTitle.innerText = "노넴툰 로그인";
-                nicknameGroup.style.display = "none";
-                nicknameInput.required = false;
-                submitBtn.innerText = "로그인하기";
-                switchPrompt.innerText = "아직 계정이 없으신가요?";
-                switchModeBtn.innerText = "회원가입";
+                modalTitle.innerText = "노넴툰 로그인"; nicknameGroup.style.display = "none"; nicknameInput.required = false; submitBtn.innerText = "로그인하기"; switchPrompt.innerText = "아직 계정이 없으신가요?"; switchModeBtn.innerText = "회원가입";
             }
         };
 
-        // 폼 제출 (회원가입 또는 로그인)
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
-            const nickname = nicknameInput.value.trim();
-
+            const email = emailInput.value.trim(); const password = passwordInput.value; const nickname = nicknameInput.value.trim();
             try {
                 if (isSignUpMode) {
-                    // 1. Firebase Auth 회원가입
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    const user = userCredential.user;
-
-                    // 닉네임 프로필 업데이트
-                    await updateProfile(user, { displayName: nickname });
-
-                    // 2. Firestore 'users' 컬렉션에 사용자 정보 저장
-                    await setDoc(doc(db, "users", user.uid), {
-                        email: email,
-                        nickname: nickname,
-                        role: "reader",
-                        createdAt: new Date().toISOString()
-                    });
-
-                    alert(`환영합니다, ${nickname}님! 가입이 완료되었습니다.`);
+                    await updateProfile(userCredential.user, { displayName: nickname });
+                    await setDoc(doc(db, "users", userCredential.user.uid), { email, nickname, role: "reader", createdAt: new Date().toISOString() });
+                    alert(`가입 완료! 환영합니다, ${nickname}님.`);
                 } else {
-                    // Firebase Auth 로그인
                     await signInWithEmailAndPassword(auth, email, password);
-                    alert("성공적으로 로그인되었습니다!");
+                    alert("로그인되었습니다!");
                 }
                 closeAuthModal();
-                emailInput.value = "";
-                passwordInput.value = "";
-                nicknameInput.value = "";
-            } catch (error) {
-                console.error("인증 에러:", error);
-                if (error.code === 'auth/email-already-in-use') {
-                    alert('이미 사용 중인 이메일 주소입니다.');
-                } else if (error.code === 'auth/weak-password') {
-                    alert('비밀번호는 최소 6자 이상이어야 합니다.');
-                } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-                    alert('이메일 또는 비밀번호가 일치하지 않습니다.');
-                } else {
-                    alert(`오류가 발생했습니다: ${error.message}`);
-                }
-            }
+                emailInput.value = ""; passwordInput.value = ""; nicknameInput.value = "";
+            } catch (error) { alert(`오류 발생: ${error.message}`); }
         });
 
-        // 실시간 로그인 상태 감지
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             if (user) {
-                // 로그인된 상태
                 const name = user.displayName || user.email.split('@')[0];
-                userGreeting.innerText = `👋 ${name}님`;
-                userGreeting.style.display = "inline";
-                authActionBtn.innerText = "로그아웃";
-                authActionBtn.onclick = async () => {
-                    await signOut(auth);
-                    alert("로그아웃되었습니다.");
-                };
+                userGreeting.innerText = `👋 ${name}님`; userGreeting.style.display = "inline";
+                authActionBtn.innerText = "로그아웃"; authActionBtn.onclick = async () => { await signOut(auth); alert("로그아웃되었습니다."); };
             } else {
-                // 로그아웃된 상태
                 userGreeting.style.display = "none";
-                authActionBtn.innerText = "로그인";
-                authActionBtn.onclick = () => openLoginModal();
+                authActionBtn.innerText = "로그인"; authActionBtn.onclick = () => openLoginModal();
             }
         });
 
-        // 작품 올리기 버튼 클릭 동작
         heroUploadBtn.addEventListener('click', () => {
-            if (!currentUser) {
-                alert('작품을 등록하려면 먼저 로그인이 필요합니다!');
-                openLoginModal();
-            } else {
-                // upload.html 파일로 이동시킵니다!
-                window.location.href = 'upload.html';
-            }
+            if (!currentUser) { alert('로그인이 필요합니다!'); openLoginModal(); } 
+            else { window.location.href = 'upload.html'; }
         });
     </script>
-
-    <!-- 테마 토글 스크립트 -->
     <script>
         const htmlEl = document.documentElement;
         const themeBtn = document.getElementById('themeToggle');
         const savedTheme = localStorage.getItem('theme') || 'light';
         htmlEl.setAttribute('data-theme', savedTheme);
-        updateThemeBtn(savedTheme);
-
+        themeBtn.innerText = savedTheme === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드';
         function toggleTheme() {
-            const current = htmlEl.getAttribute('data-theme');
-            const next = current === 'light' ? 'dark' : 'light';
-            htmlEl.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-            updateThemeBtn(next);
-        }
-
-        function updateThemeBtn(theme) {
-            themeBtn.innerText = theme === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드';
+            const next = htmlEl.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            htmlEl.setAttribute('data-theme', next); localStorage.setItem('theme', next);
+            themeBtn.innerText = next === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드';
         }
     </script>
 </body>
