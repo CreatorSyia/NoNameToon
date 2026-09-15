@@ -69,8 +69,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        // increment(숫자 증가 함수)를 가져옵니다.
-        import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, deleteDoc, query, where, onSnapshot, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        // setDoc 함수가 추가되었습니다.
+        import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, deleteDoc, query, where, onSnapshot, serverTimestamp, increment, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc", authDomain: "nonametoon-907aa.firebaseapp.com",
@@ -123,11 +123,23 @@
                 const webtoonRef = doc(db, "webtoons", epData.webtoon_id);
                 const webtoonSnap = await getDoc(webtoonRef);
                 
-                // ===== 조회수 증가 로직 =====
-                // 페이지를 열 때마다 해당 에피소드와 원본 웹툰의 전체 조회수를 1씩 올립니다.
+                // ===== 1. 조회수 증가 로직 =====
                 await updateDoc(epRef, { views: increment(1) });
                 await updateDoc(webtoonRef, { total_views: increment(1) });
-                // =========================
+                
+                // ===== 2. 최근 본 감상 기록(History) 저장 로직 =====
+                if (currentUser) {
+                    // 유저ID_웹툰ID 로 문서를 만들어서, 1화에서 2화로 넘어가도 덮어쓰기가 되도록 합니다.
+                    const historyRef = doc(db, "history", `${currentUser.uid}_${epData.webtoon_id}`);
+                    await setDoc(historyRef, {
+                        user_id: currentUser.uid,
+                        webtoon_id: epData.webtoon_id,
+                        episode_id: epId,
+                        episode_number: epData.episode_number,
+                        last_viewed_at: serverTimestamp()
+                    });
+                }
+                // ===============================================
 
                 if (webtoonSnap.exists()) {
                     const wtData = webtoonSnap.data();
