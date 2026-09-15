@@ -101,6 +101,10 @@
             <nav class="nav-links">
                 <a href="#">연재작</a>
                 <a href="#">베스트</a>
+                
+                <!-- 마이페이지 링크 (로그인 시에만 보이게 설정) -->
+                <a href="mypage.html" id="mypageLink" style="display: none; font-weight: bold;">마이페이지</a>
+                
                 <span id="userGreeting" class="user-greeting" style="display: none;"></span>
                 <a href="javascript:void(0)" id="authActionBtn" class="auth-btn" onclick="openLoginModal()">로그인</a>
                 <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()">🌙 다크 모드</button>
@@ -187,6 +191,7 @@
         const userGreeting = document.getElementById('userGreeting');
         const heroUploadBtn = document.getElementById('heroUploadBtn');
         const webtoonGrid = document.getElementById('webtoonGrid');
+        const mypageLink = document.getElementById('mypageLink'); // 마이페이지 링크 요소 가져오기
 
         let isSignUpMode = false;
         let currentUser = null;
@@ -268,10 +273,16 @@
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             if (user) {
+                // 로그인 상태일 때 마이페이지 보이게 하기
+                mypageLink.style.display = "inline";
+                
                 const name = user.displayName || user.email.split('@')[0];
                 userGreeting.innerText = `👋 ${name}님`; userGreeting.style.display = "inline";
                 authActionBtn.innerText = "로그아웃"; authActionBtn.onclick = async () => { await signOut(auth); alert("로그아웃되었습니다."); };
             } else {
+                // 로그아웃 상태일 때 마이페이지 숨기기
+                mypageLink.style.display = "none";
+                
                 userGreeting.style.display = "none";
                 authActionBtn.innerText = "로그인"; authActionBtn.onclick = () => openLoginModal();
             }
