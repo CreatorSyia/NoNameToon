@@ -163,8 +163,8 @@
                             <div class="ep-date">${dateStr}</div>
                         `;
                         
-                        // 회차 클릭 시 뷰어(웹툰 보는 곳)로 이동
-                        epItem.onclick = () => alert(`'${ep.title}' 감상 페이지로 이동합니다! (다음 단계)`);
+                        // 회차 클릭 시 뷰어(웹툰 보는 곳)로 이동하도록 수정 완료!
+                        epItem.onclick = () => { window.location.href = `viewer.html?epId=${docSnap.id}`; };
                         
                         episodeList.appendChild(epItem);
                     });
@@ -176,7 +176,7 @@
                         const authorMenu = document.getElementById('authorMenu');
                         authorMenu.style.display = 'block';
                         
-                        // 버튼 클릭 시 회차 등록 페이지로 이동하도록 수정 완료!
+                        // 버튼 클릭 시 회차 등록 페이지로 이동
                         document.getElementById('addEpisodeBtn').onclick = () => {
                             window.location.href = `upload_episode.html?webtoonId=${webtoonId}`;
                         };
