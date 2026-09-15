@@ -5,28 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>작품 상세 - 노넴툰</title>
     <style>
-        /* 기본 테마 변수 */
-        :root {
-            --bg-color: #f8f9fa; --text-color: #212529; --header-bg: #ffffff; --card-bg: #ffffff;
-            --border-color: #dee2e6; --accent-color: #6366f1; --accent-hover: #4f46e5;
-        }
-        [data-theme="dark"] {
-            --bg-color: #121212; --text-color: #e0e0e0; --header-bg: #1e1e1e; --card-bg: #2d2d2d;
-            --border-color: #404040; --accent-color: #818cf8; --accent-hover: #6366f1;
-        }
-
+        :root { --bg-color: #f8f9fa; --text-color: #212529; --header-bg: #ffffff; --card-bg: #ffffff; --border-color: #dee2e6; --accent-color: #6366f1; --accent-hover: #4f46e5; }
+        [data-theme="dark"] { --bg-color: #121212; --text-color: #e0e0e0; --header-bg: #1e1e1e; --card-bg: #2d2d2d; --border-color: #404040; --accent-color: #818cf8; --accent-hover: #6366f1; }
         * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.3s, color 0.3s; }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
         a { text-decoration: none; color: inherit; }
-
-        /* 헤더 */
         header { background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 1.5rem; font-weight: 800; color: var(--accent-color); }
-
-        /* 컨테이너 */
         .detail-container { max-width: 900px; margin: 3rem auto; padding: 0 2rem; }
-
-        /* 작품 정보 섹션 (상단) */
         .webtoon-header { display: flex; gap: 2rem; background-color: var(--card-bg); padding: 2rem; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 3rem; flex-wrap: wrap; }
         .thumbnail { width: 220px; height: 300px; border-radius: 8px; object-fit: cover; background-color: #ddd; flex-shrink: 0; }
         .info-box { flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-start; }
@@ -34,83 +20,56 @@
         .title { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
         .author { font-size: 1.1rem; opacity: 0.8; margin-bottom: 1.5rem; }
         .description { font-size: 1rem; line-height: 1.8; opacity: 0.9; margin-bottom: 2rem; flex-grow: 1; }
-        
-        /* 작가 전용 메뉴 */
         .author-menu { display: none; margin-top: auto; padding-top: 1rem; border-top: 1px dashed var(--border-color); }
         .btn-add-episode { background-color: var(--accent-color); color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-add-episode:hover { background-color: var(--accent-hover); }
-
-        /* 회차 목록 섹션 */
         .episode-section-title { font-size: 1.3rem; margin-bottom: 1rem; font-weight: bold; }
         .episode-list { background-color: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; }
-        .episode-item { display: flex; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background-color 0.2s; }
+        .episode-item { display: flex; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); cursor: pointer; }
         .episode-item:hover { background-color: rgba(99, 102, 241, 0.05); }
-        .episode-item:last-child { border-bottom: none; }
         .ep-number { font-size: 1.2rem; font-weight: bold; width: 60px; color: var(--accent-color); }
         .ep-title { flex-grow: 1; font-size: 1.1rem; font-weight: 500; }
         .ep-date { font-size: 0.9rem; opacity: 0.6; }
-        
         .empty-episodes { padding: 3rem; text-align: center; opacity: 0.7; }
     </style>
 </head>
 <body>
-
     <header>
         <a href="index.html" class="logo">노넴툰</a>
         <a href="index.html" style="font-weight: 600;">⬅️ 목록으로</a>
     </header>
 
     <main class="detail-container">
-        <!-- 1. 작품 상세 정보 -->
         <section class="webtoon-header" id="webtoonHeader">
             <div style="text-align: center; width: 100%; padding: 3rem; opacity: 0.7;">작품 정보를 불러오는 중입니다... 🔄</div>
         </section>
-
-        <!-- 2. 회차(에피소드) 목록 -->
         <h3 class="episode-section-title">회차 목록</h3>
         <div class="episode-list" id="episodeList">
             <div class="empty-episodes">회차 정보를 불러오는 중입니다... 🔄</div>
         </div>
     </main>
 
-    <!-- Firebase 로직 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc",
-            authDomain: "nonametoon-907aa.firebaseapp.com",
-            projectId: "nonametoon-907aa",
-            storageBucket: "nonametoon-907aa.firebasestorage.app",
-            messagingSenderId: "581148914100",
-            appId: "1:581148914100:web:03e65a96e29086eff682e1",
-            measurementId: "G-Q5P01H9MKZ"
+            apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc", authDomain: "nonametoon-907aa.firebaseapp.com",
+            projectId: "nonametoon-907aa", storageBucket: "nonametoon-907aa.firebasestorage.app",
+            messagingSenderId: "581148914100", appId: "1:581148914100:web:03e65a96e29086eff682e1", measurementId: "G-Q5P01H9MKZ"
         };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // URL에서 작품 ID 파라미터 가져오기 (예: detail.html?id=abc1234)
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+        
         const urlParams = new URLSearchParams(window.location.search);
         const webtoonId = urlParams.get('id');
 
         const webtoonHeader = document.getElementById('webtoonHeader');
         const episodeList = document.getElementById('episodeList');
-        let currentUserId = null;
 
-        // 메인 로직 실행
         async function initPage() {
-            if (!webtoonId) {
-                alert("잘못된 접근입니다.");
-                window.location.href = "index.html";
-                return;
-            }
+            if (!webtoonId) { alert("잘못된 접근입니다."); window.location.href = "index.html"; return; }
 
             try {
-                // 1. 웹툰 기본 정보 불러오기
                 const webtoonRef = doc(db, "webtoons", webtoonId);
                 const webtoonSnap = await getDoc(webtoonRef);
 
@@ -121,14 +80,19 @@
 
                 const wtData = webtoonSnap.data();
                 
-                // 정보 렌더링
+                // 에러 방어 코드: 데이터가 비어있을 경우를 대비함
+                const descriptionStr = wtData.description ? wtData.description.replace(/\n/g, '<br>') : "등록된 작품 설명이 없습니다.";
+                const thumbUrl = wtData.thumbnail_url || 'https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image';
+                const authorName = wtData.author_nickname || wtData.author || '무명작가';
+                const genre = wtData.genre || '장르 없음';
+
                 webtoonHeader.innerHTML = `
-                    <img src="${wtData.thumbnail_url}" alt="썸네일" class="thumbnail" onerror="this.src='https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image'">
+                    <img src="${thumbUrl}" alt="썸네일" class="thumbnail" onerror="this.src='https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image'">
                     <div class="info-box">
-                        <span class="genre-badge">${wtData.genre || '장르 없음'}</span>
-                        <h1 class="title">${wtData.title}</h1>
-                        <div class="author">글/그림 : ${wtData.author_nickname}</div>
-                        <div class="description">${wtData.description.replace(/\n/g, '<br>')}</div>
+                        <span class="genre-badge">${genre}</span>
+                        <h1 class="title">${wtData.title || '제목 없음'}</h1>
+                        <div class="author">글/그림 : ${authorName}</div>
+                        <div class="description">${descriptionStr}</div>
                         
                         <div class="author-menu" id="authorMenu">
                             <button class="btn-add-episode" id="addEpisodeBtn">+ 새 회차(에피소드) 올리기</button>
@@ -136,10 +100,8 @@
                     </div>
                 `;
 
-                // 2. 에피소드 목록 불러오기 (최신 화가 맨 위로 오게 내림차순 정렬)
                 const epQuery = query(collection(db, "episodes"), where("webtoon_id", "==", webtoonId), orderBy("episode_number", "desc"));
                 const epSnap = await getDocs(epQuery);
-
                 episodeList.innerHTML = '';
 
                 if (epSnap.empty) {
@@ -147,9 +109,7 @@
                 } else {
                     epSnap.forEach((docSnap) => {
                         const ep = docSnap.data();
-                        
-                        // 날짜 포맷 (예: 2026. 09. 15)
-                        let dateStr = '날짜 정보 없음';
+                        let dateStr = '날짜 없음';
                         if (ep.created_at) {
                             const d = ep.created_at.toDate ? ep.created_at.toDate() : new Date(ep.created_at);
                             dateStr = `${d.getFullYear()}. ${String(d.getMonth()+1).padStart(2, '0')}. ${String(d.getDate()).padStart(2, '0')}`;
@@ -158,41 +118,29 @@
                         const epItem = document.createElement('div');
                         epItem.className = 'episode-item';
                         epItem.innerHTML = `
-                            <div class="ep-number">${ep.episode_number}화</div>
-                            <div class="ep-title">${ep.title}</div>
+                            <div class="ep-number">${ep.episode_number || 0}화</div>
+                            <div class="ep-title">${ep.title || '제목 없음'}</div>
                             <div class="ep-date">${dateStr}</div>
                         `;
-                        
-                        // 회차 클릭 시 뷰어(웹툰 보는 곳)로 이동하도록 수정 완료!
                         epItem.onclick = () => { window.location.href = `viewer.html?epId=${docSnap.id}`; };
-                        
                         episodeList.appendChild(epItem);
                     });
                 }
 
-                // 3. 현재 접속자가 이 작품의 작가인지 확인하여 '새 회차 올리기' 버튼 띄우기
                 onAuthStateChanged(auth, (user) => {
                     if (user && user.uid === wtData.author_id) {
                         const authorMenu = document.getElementById('authorMenu');
                         authorMenu.style.display = 'block';
-                        
-                        // 버튼 클릭 시 회차 등록 페이지로 이동
-                        document.getElementById('addEpisodeBtn').onclick = () => {
-                            window.location.href = `upload_episode.html?webtoonId=${webtoonId}`;
-                        };
+                        document.getElementById('addEpisodeBtn').onclick = () => { window.location.href = `upload_episode.html?webtoonId=${webtoonId}`; };
                     }
                 });
-
             } catch (error) {
                 console.error("데이터 로드 에러:", error);
                 webtoonHeader.innerHTML = '<div style="width: 100%; text-align: center;">데이터를 불러오는 중 오류가 발생했습니다.</div>';
             }
         }
-
-        // 테마 유지
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
-
         initPage();
     </script>
 </body>
