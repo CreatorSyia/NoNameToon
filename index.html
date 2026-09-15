@@ -25,7 +25,7 @@
         .hero p { font-size: 1rem; margin-bottom: 1.5rem; opacity: 0.8; }
         .btn-upload { background-color: var(--accent-color); color: white; padding: 0.8rem 2rem; border: none; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 
-        /* 배너 슬라이드 스타일 (최대 4장 한정) */
+        /* 배너 슬라이드 스타일 */
         .banner-section { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; }
         .banner-container { position: relative; width: 100%; height: 350px; border-radius: 16px; overflow: hidden; background-color: #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .banner-track { display: flex; width: 100%; height: 100%; transition: transform 0.5s ease-in-out; }
@@ -100,7 +100,7 @@
         <button class="btn-upload" id="heroUploadBtn">✏️ 내 작품 올리기</button>
     </section>
 
-    <!-- 배너 섹션 (최대 4장 슬라이드) -->
+    <!-- 배너 섹션 -->
     <section class="banner-section">
         <div class="banner-container" id="bannerContainer">
             <div class="banner-track" id="bannerTrack">
@@ -151,7 +151,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        // orderBy 제거 (에러 방지)
+        import { getFirestore, doc, setDoc, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc", authDomain: "nonametoon-907aa.firebaseapp.com", projectId: "nonametoon-907aa",
@@ -169,21 +170,29 @@
 
         let isSignUpMode = false; let currentUser = null;
 
-        // 배너 및 공지사항, 웹툰 로드
+        // 안전한 웹툰 및 배너 데이터 로드
         async function loadMainData() {
             try {
-                // 최신순 쿼리 (공통)
-                const q = query(collection(db, "webtoons"), orderBy("created_at", "desc"));
+                // orderBy 없이 전체 가져오기
+                const q = query(collection(db, "webtoons"));
                 const querySnapshot = await getDocs(q);
 
                 webtoonGrid.innerHTML = '';
                 if (querySnapshot.empty) { 
                     webtoonGrid.innerHTML = '<div class="empty-message">아직 등록된 작품이 없습니다.</div>'; 
+                    return;
                 }
 
                 let webtoonsList = [];
                 querySnapshot.forEach((docSnap) => {
                     webtoonsList.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                // 자바스크립트로 최신순(created_at 기준 내림차순) 안전 정렬
+                webtoonsList.sort((a, b) => {
+                    const timeA = a.created_at ? (a.created_at.toDate ? a.created_at.toDate().getTime() : new Date(a.created_at).getTime()) : 0;
+                    const timeB = b.created_at ? (b.created_at.toDate ? b.created_at.toDate().getTime() : new Date(b.created_at).getTime()) : 0;
+                    return timeB - timeA;
                 });
 
                 // 1. 메인 웹툰 그리드 렌더링
@@ -207,7 +216,7 @@
                 // 2. 배너 렌더링 (최대 4장 한정)
                 const bannerTrack = document.getElementById('bannerTrack');
                 const bannerDots = document.getElementById('bannerDots');
-                const bannerItems = webtoonsList.slice(0, 4); // 최대 4개 제한
+                const bannerItems = webtoonsList.slice(0, 4);
 
                 if (bannerItems.length > 0) {
                     bannerTrack.innerHTML = '';
@@ -229,7 +238,6 @@
                         slide.onclick = () => { window.location.href = `detail.html?id=${item.id}`; };
                         bannerTrack.appendChild(slide);
 
-                        // 도트 생성
                         const dot = document.createElement('div');
                         dot.className = `banner-dot ${index === 0 ? 'active' : ''}`;
                         dot.onclick = (e) => {
@@ -240,7 +248,6 @@
                         bannerDots.appendChild(dot);
                     });
 
-                    // 슬라이더 인터랙션 로직
                     let currentIndex = 0;
                     const totalSlides = bannerItems.length;
 
@@ -263,7 +270,6 @@
                         updateSlider();
                     };
 
-                    // 자동 슬라이드 (4초마다)
                     setInterval(() => {
                         currentIndex = (currentIndex + 1) % totalSlides;
                         updateSlider();
@@ -271,41 +277,34 @@
                 }
 
             } catch (error) { 
-                console.error(error); 
+                console.error("메인 데이터 로드 에러:", error);
+                webtoonGrid.innerHTML = '<div class="empty-message">작품을 불러오는데 실패했습니다.</div>'; 
             }
         }
 
-        // 3. 공지사항 불러오기
+        // 3. 안전한 공지사항 불러오기
         async function loadNotices() {
             const noticeList = document.getElementById('noticeList');
             try {
-                const qNotices = query(collection(db, "notices"), orderBy("created_at", "desc"), limit(3));
+                const qNotices = query(collection(db, "notices"));
                 const snap = await getDocs(qNotices);
                 noticeList.innerHTML = '';
 
-                if (snap.empty) {
-                    // 기본 기본 공지사항 1개 띄워주기
+                let noticesList = [];
+                snap.forEach((docSnap) => {
+                    noticesList.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                // 자바스크립트로 최신순 정렬 후 최대 3개만 추출
+                noticesList.sort((a, b) => {
+                    const timeA = a.created_at ? (a.created_at.toDate ? a.created_at.toDate().getTime() : new Date(a.created_at).getTime()) : 0;
+                    const timeB = b.created_at ? (b.created_at.toDate ? b.created_at.toDate().getTime() : new Date(b.created_at).getTime()) : 0;
+                    return timeB - timeA;
+                });
+
+                const topNotices = noticesList.slice(0, 3);
+
+                if (topNotices.length === 0) {
                     noticeList.innerHTML = `
                         <div class="notice-item" onclick="window.location.href='notice.html?id=welcome'">
-                            <div class="notice-item-title">[안내] 노넴툰 서비스에 오신 것을 환영합니다! 🎉</div>
-                            <div class="notice-item-date">2026.03.15</div>
-                        </div>
-                    `;
-                    return;
-                }
-
-                snap.forEach((docSnap) => {
-                    const notice = docSnap.data();
-                    let dateStr = '2026.03.15';
-                    if (notice.created_at && notice.created_at.toDate) {
-                        const d = notice.created_at.toDate();
-                        dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
-                    }
-
-                    const item = document.createElement('div');
-                    item.className = 'notice-item';
-                    item.innerHTML = `
-                        <div class="notice-item-title">${notice.title}</div>
-                        <div class="notice-item-date">${dateStr}</div>
-                    `;
-                    item.onclick =
+        
