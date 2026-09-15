@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>노넴툰(No Name Toon) - 무명 작가들의 웹툰</title>
+    <style>
+        /* 기본 테마 변수 (라이트 모드) */
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --header-bg: #ffffff;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+        }
+
+        /* 다크 모드 변수 */
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --header-bg: #1e1e1e;
+            --card-bg: #2d2d2d;
+            --border-color: #404040;
+            --accent-color: #818cf8;
+            --accent-hover: #6366f1;
+        }
+
+        /* 기본 설정 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* 헤더 & 네비게이션 */
+        header {
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent-color);
+        }
+
+        .logo span {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: var(--text-color);
+            margin-left: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        /* 테마 토글 버튼 */
+        .theme-toggle-btn {
+            background: none;
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .theme-toggle-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        /* 메인 배너 (Hero Section) */
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.8;
+        }
+
+        .btn-upload {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-upload:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* 웹툰 목록 섹션 */
+        .webtoon-section {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .webtoon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .webtoon-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .webtoon-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+        }
+
+        .webtoon-thumbnail {
+            width: 100%;
+            height: 200px;
+            background-color: #ddd;
+            object-fit: cover;
+        }
+
+        .webtoon-info {
+            padding: 1rem;
+        }
+
+        .webtoon-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+        }
+
+        .webtoon-author {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* 푸터 */
+        footer {
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        /* 반응형 모바일 설정 */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none; /* 모바일에서는 메뉴 숨김 (햄버거 메뉴로 대체 가능) */
+            }
+            .hero h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 헤더 -->
+    <header>
+        <div class="nav-container">
+            <a href="#" class="logo">노넴툰 <span>무명 작가들의 웹툰</span></a>
+            <nav class="nav-links">
+                <a href="#">연재작</a>
+                <a href="#">베스트</a>
+                <a href="#">자유게시판</a>
+                <a href="#">마이페이지</a>
+                <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()">🌙 다크 모드</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 메인 배너 -->
+    <section class="hero">
+        <h1>누구나 웹툰 작가가 될 수 있는 곳</h1>
+        <p>당신의 머릿속에만 있던 이야기, 이제 '노넴툰'에서 마음껏 펼쳐보세요.</p>
+        <button class="btn-upload">✏️ 내 작품 올리기</button>
+    </section>
+
+    <!-- 실시간 업데이트 웹툰 -->
+    <main class="webtoon-section">
+        <h2 class="section-title">✨ 새로 올라온 작품</h2>
+        <div class="webtoon-grid">
+            <!-- 웹툰 카드 1 -->
+            <div class="webtoon-card">
+                <img src="https://via.placeholder.com/300x400/eeeeee/999999?text=Webtoon+1" alt="웹툰 썸네일" class="webtoon-thumbnail">
+                <div class="webtoon-info">
+                    <div class="webtoon-title">달빛 아래 그림자</div>
+                    <div class="webtoon-author">작가: 무명A</div>
+                </div>
+            </div>
+            <!-- 웹툰 카드 2 -->
+            <div class="webtoon-card">
+                <img src="https://via.placeholder.com/300x400/eeeeee/999999?text=Webtoon+2" alt="웹툰 썸네일" class="webtoon-thumbnail">
+                <div class="webtoon-info">
+                    <div class="webtoon-title">오늘부터 마법사</div>
+                    <div class="webtoon-author">작가: 글쟁이</div>
+                </div>
+            </div>
+            <!-- 웹툰 카드 3 -->
+            <div class="webtoon-card">
+                <img src="https://via.placeholder.com/300x400/eeeeee/999999?text=Webtoon+3" alt="웹툰 썸네일" class="webtoon-thumbnail">
+                <div class="webtoon-info">
+                    <div class="webtoon-title">용사의 은퇴 라이프</div>
+                    <div class="webtoon-author">작가: 백수용사</div>
+                </div>
+            </div>
+            <!-- 웹툰 카드 4 -->
+            <div class="webtoon-card">
+                <img src="https://via.placeholder.com/300x400/eeeeee/999999?text=Webtoon+4" alt="웹툰 썸네일" class="webtoon-thumbnail">
+                <div class="webtoon-info">
+                    <div class="webtoon-title">평범한 학교생활</div>
+                    <div class="webtoon-author">작가: 김노넴</div>
+                </div>
+            </div>
+            <!-- 웹툰 카드 5 -->
+            <div class="webtoon-card">
+                <img src="https://via.placeholder.com/300x400/eeeeee/999999?text=Webtoon+5" alt="웹툰 썸네일" class="webtoon-thumbnail">
+                <div class="webtoon-info">
+                    <div class="webtoon-title">우주 정거장 101</div>
+                    <div class="webtoon-author">작가: 스페이스</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer>
+        <p>&copy; 2026 노넴툰(No Name Toon). All rights reserved.</p>
+        <p style="font-size: 0.8rem; margin-top: 10px; opacity: 0.7;">본 사이트는 무명 작가들의 창작 활동을 응원합니다.</p>
+    </footer>
+
+    <!-- 자바스크립트 (테마 토글 로직) -->
+    <script>
+        const htmlEl = document.documentElement;
+        const themeBtn = document.getElementById('themeToggle');
+
+        // 사용자가 이전에 설정한 테마 불러오기 (기본값: 라이트모드)
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        htmlEl.setAttribute('data-theme', savedTheme);
+        updateButtonText(savedTheme);
+
+        function toggleTheme() {
+            const currentTheme = htmlEl.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            // 테마 적용
+            htmlEl.setAttribute('data-theme', newTheme);
+            
+            // 로컬 스토리지에 저장 (새로고침해도 유지되도록)
+            localStorage.setItem('theme', newTheme);
+            
+            // 버튼 텍스트 변경
+            updateButtonText(newTheme);
+        }
+
+        function updateButtonText(theme) {
+            if (theme === 'dark') {
+                themeBtn.innerHTML = '☀️ 라이트 모드';
+            } else {
+                themeBtn.innerHTML = '🌙 다크 모드';
+            }
+        }
+    </script>
+</body>
+</html>
