@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>새 회차 올리기 - 노넴툰</title>
+    <style>
+        :root {
+            --bg-color: #f8f9fa; --text-color: #212529; --header-bg: #ffffff; --card-bg: #ffffff;
+            --border-color: #dee2e6; --accent-color: #6366f1; --accent-hover: #4f46e5; --input-bg: #ffffff;
+        }
+        [data-theme="dark"] {
+            --bg-color: #121212; --text-color: #e0e0e0; --header-bg: #1e1e1e; --card-bg: #2d2d2d;
+            --border-color: #404040; --accent-color: #818cf8; --accent-hover: #6366f1; --input-bg: #1e1e1e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
+        a { text-decoration: none; color: inherit; }
+
+        header { background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: var(--accent-color); }
+        .back-btn { font-weight: 600; cursor: pointer; color: var(--text-color); }
+
+        .upload-container { max-width: 600px; margin: 3rem auto; background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .upload-title { font-size: 1.8rem; margin-bottom: 2rem; text-align: center; font-weight: 800; }
+
+        .input-group { margin-bottom: 1.5rem; }
+        .input-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; font-size: 0.95rem; }
+        .input-group input, .input-group textarea { width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--input-bg); color: var(--text-color); font-size: 1rem; font-family: inherit; }
+        .input-group textarea { resize: vertical; min-height: 150px; }
+        .input-group input:focus, .input-group textarea:focus { outline: none; border-color: var(--accent-color); }
+
+        .btn-submit { width: 100%; padding: 1rem; background-color: var(--accent-color); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 1rem; }
+        .btn-submit:hover { background-color: var(--accent-hover); }
+        .btn-submit:disabled { background-color: var(--border-color); cursor: not-allowed; }
+
+        .help-text { font-size: 0.85rem; opacity: 0.7; margin-top: 0.4rem; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">노넴툰</a>
+        <a href="javascript:history.back()" class="back-btn">⬅️ 이전으로</a>
+    </header>
+
+    <main class="upload-container">
+        <h2 class="upload-title">새 회차 등록하기</h2>
+        
+        <form id="episodeForm">
+            <div class="input-group">
+                <label for="epNumber">몇 화인가요?</label>
+                <input type="number" id="epNumber" placeholder="예: 1, 2, 3..." required min="1">
+            </div>
+
+            <div class="input-group">
+                <label for="epTitle">회차 제목</label>
+                <input type="text" id="epTitle" placeholder="예: 1화 - 운명적인 만남" required>
+            </div>
+
+            <div class="input-group">
+                <label for="epImages">웹툰 본문 이미지 (URL)</label>
+                <textarea id="epImages" placeholder="이미지 주소(URL)를 입력하세요.&#10;여러 장일 경우 줄바꿈(엔터)으로 구분해주세요." required></textarea>
+                <p class="help-text">
+                    ※ 현재 버전에서는 이미지 주소를 직접 입력해야 합니다.<br>
+                    예시:<br>
+                    https://example.com/image1.jpg<br>
+                    https://example.com/image2.jpg
+                </p>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">회차 등록하기</button>
+        </form>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc",
+            authDomain: "nonametoon-907aa.firebaseapp.com",
+            projectId: "nonametoon-907aa",
+            storageBucket: "nonametoon-907aa.firebasestorage.app",
+            messagingSenderId: "581148914100",
+            appId: "1:581148914100:web:03e65a96e29086eff682e1",
+            measurementId: "G-Q5P01H9MKZ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // URL에서 어떤 웹툰에 올리는 것인지 ID 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const webtoonId = urlParams.get('webtoonId');
+        
+        let currentUser = null;
+        const submitBtn = document.getElementById('submitBtn');
+
+        // 권한 확인 및 초기화
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                if (!webtoonId) {
+                    alert("작품 정보가 유효하지 않습니다.");
+                    window.history.back();
+                }
+            } else {
+                alert("로그인이 필요합니다.");
+                window.location.href = "index.html";
+            }
+        });
+
+        // 폼 제출 시 데이터베이스 저장
+        document.getElementById('episodeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser || !webtoonId) return;
+            
+            submitBtn.disabled = true;
+            submitBtn.innerText = "등록 중...";
+
+            const epNumber = parseInt(document.getElementById('epNumber').value);
+            const epTitle = document.getElementById('epTitle').value;
+            const epImagesRaw = document.getElementById('epImages').value;
+
+            // 엔터(줄바꿈) 기준으로 쪼개서 배열로 만들기 + 빈 줄 제거
+            const imagesArray = epImagesRaw.split('\n').map(url => url.trim()).filter(url => url !== "");
+
+            try {
+                await addDoc(collection(db, "episodes"), {
+                    webtoon_id: webtoonId,
+                    episode_number: epNumber,
+                    title: epTitle,
+                    content_images: imagesArray,
+                    views: 0,
+                    created_at: serverTimestamp()
+                });
+
+                alert("회차가 성공적으로 등록되었습니다!");
+                // 등록 완료 후 다시 해당 작품의 상세 페이지로 돌아가기
+                window.location.href = `detail.html?id=${webtoonId}`;
+
+            } catch (error) {
+                console.error("에피소드 등록 에러:", error);
+                alert("등록 중 오류가 발생했습니다.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "회차 등록하기";
+            }
+        });
+
+        // 테마 유지
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+</body>
+</html>
