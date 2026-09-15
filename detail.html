@@ -51,7 +51,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        // orderBy를 뺐습니다!
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc", authDomain: "nonametoon-907aa.firebaseapp.com",
@@ -70,6 +71,7 @@
             if (!webtoonId) { alert("잘못된 접근입니다."); window.location.href = "index.html"; return; }
 
             try {
+                // 1. 웹툰 기본 정보 불러오기
                 const webtoonRef = doc(db, "webtoons", webtoonId);
                 const webtoonSnap = await getDoc(webtoonRef);
 
@@ -80,8 +82,14 @@
 
                 const wtData = webtoonSnap.data();
                 
-                // 에러 방어 코드: 데이터가 비어있을 경우를 대비함
-                const descriptionStr = wtData.description ? wtData.description.replace(/\n/g, '<br>') : "등록된 작품 설명이 없습니다.";
+                // 에러 방어 코드: 줄거리가 없거나 문자열이 아닐 때 에러 방지
+                let descriptionStr = "등록된 작품 설명이 없습니다.";
+                if (typeof wtData.description === 'string') {
+                    descriptionStr = wtData.description.replace(/\n/g, '<br>');
+                } else if (wtData.description) {
+                    descriptionStr = String(wtData.description);
+                }
+
                 const thumbUrl = wtData.thumbnail_url || 'https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image';
                 const authorName = wtData.author_nickname || wtData.author || '무명작가';
                 const genre = wtData.genre || '장르 없음';
@@ -100,15 +108,25 @@
                     </div>
                 `;
 
-                const epQuery = query(collection(db, "episodes"), where("webtoon_id", "==", webtoonId), orderBy("episode_number", "desc"));
+                // 2. 에피소드 가져오기 (orderBy 에러 방지를 위해 where 조건만 사용)
+                const epQuery = query(collection(db, "episodes"), where("webtoon_id", "==", webtoonId));
                 const epSnap = await getDocs(epQuery);
                 episodeList.innerHTML = '';
 
                 if (epSnap.empty) {
                     episodeList.innerHTML = '<div class="empty-episodes">아직 등록된 회차가 없습니다.</div>';
                 } else {
+                    // 데이터를 먼저 배열에 담습니다.
+                    let epArray = [];
                     epSnap.forEach((docSnap) => {
-                        const ep = docSnap.data();
+                        epArray.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+
+                    // 자바스크립트를 이용해 최신화(숫자가 큰 것)부터 내림차순 정렬합니다.
+                    epArray.sort((a, b) => (b.episode_number || 0) - (a.episode_number || 0));
+
+                    // 화면에 그리기
+                    epArray.forEach((ep) => {
                         let dateStr = '날짜 없음';
                         if (ep.created_at) {
                             const d = ep.created_at.toDate ? ep.created_at.toDate() : new Date(ep.created_at);
@@ -122,11 +140,12 @@
                             <div class="ep-title">${ep.title || '제목 없음'}</div>
                             <div class="ep-date">${dateStr}</div>
                         `;
-                        epItem.onclick = () => { window.location.href = `viewer.html?epId=${docSnap.id}`; };
+                        epItem.onclick = () => { window.location.href = `viewer.html?epId=${ep.id}`; };
                         episodeList.appendChild(epItem);
                     });
                 }
 
+                // 3. 내 작품일 경우 버튼 띄우기
                 onAuthStateChanged(auth, (user) => {
                     if (user && user.uid === wtData.author_id) {
                         const authorMenu = document.getElementById('authorMenu');
@@ -139,6 +158,7 @@
                 webtoonHeader.innerHTML = '<div style="width: 100%; text-align: center;">데이터를 불러오는 중 오류가 발생했습니다.</div>';
             }
         }
+        
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
         initPage();
