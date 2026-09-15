@@ -5,45 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>노넴툰(No Name Toon) - 무명 작가들의 웹툰</title>
     <style>
-        /* 기본 테마 변수 (라이트 모드) */
-        :root {
-            --bg-color: #f8f9fa;
-            --text-color: #212529;
-            --header-bg: #ffffff;
-            --card-bg: #ffffff;
-            --border-color: #dee2e6;
-            --accent-color: #6366f1;
-            --accent-hover: #4f46e5;
-            --input-bg: #ffffff;
-            --modal-overlay: rgba(0, 0, 0, 0.5);
-        }
-
-        /* 다크 모드 변수 */
-        [data-theme="dark"] {
-            --bg-color: #121212;
-            --text-color: #e0e0e0;
-            --header-bg: #1e1e1e;
-            --card-bg: #2d2d2d;
-            --border-color: #404040;
-            --accent-color: #818cf8;
-            --accent-hover: #6366f1;
-            --input-bg: #1e1e1e;
-            --modal-overlay: rgba(0, 0, 0, 0.7);
-        }
-
-        * {
-            margin: 0; padding: 0; box-sizing: border-box;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-        }
-
-        body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-color); color: var(--text-color); line-height: 1.6;
-        }
-
+        :root { --bg-color: #f8f9fa; --text-color: #212529; --header-bg: #ffffff; --card-bg: #ffffff; --border-color: #dee2e6; --accent-color: #6366f1; --accent-hover: #4f46e5; --input-bg: #ffffff; --modal-overlay: rgba(0, 0, 0, 0.5); }
+        [data-theme="dark"] { --bg-color: #121212; --text-color: #e0e0e0; --header-bg: #1e1e1e; --card-bg: #2d2d2d; --border-color: #404040; --accent-color: #818cf8; --accent-hover: #6366f1; --input-bg: #1e1e1e; --modal-overlay: rgba(0, 0, 0, 0.7); }
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
         a { text-decoration: none; color: inherit; }
-
-        /* 헤더 */
         header { background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
         .nav-container { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 1.5rem; font-weight: 800; color: var(--accent-color); }
@@ -53,58 +19,40 @@
         .auth-btn { font-weight: 700; cursor: pointer; }
         .user-greeting { font-size: 0.95rem; font-weight: 600; color: var(--accent-color); }
         .theme-toggle-btn { background: none; border: 2px solid var(--border-color); color: var(--text-color); padding: 0.4rem 0.8rem; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
-        .theme-toggle-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
-
-        /* 메인 배너 */
         .hero { text-align: center; padding: 4rem 2rem; background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); }
         .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
         .hero p { font-size: 1.1rem; margin-bottom: 2rem; opacity: 0.8; }
         .btn-upload { background-color: var(--accent-color); color: white; padding: 0.8rem 2rem; border: none; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn-upload:hover { background-color: var(--accent-hover); }
-
-        /* 웹툰 목록 */
         .webtoon-section { max-width: 1200px; margin: 3rem auto; padding: 0 2rem; }
         .section-title { font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 700; }
         .webtoon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
         .webtoon-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; cursor: pointer; }
-        .webtoon-card:hover { border-color: var(--accent-color); }
         .webtoon-thumbnail { width: 100%; height: 200px; background-color: #ddd; object-fit: cover; }
         .webtoon-info { padding: 1rem; }
         .webtoon-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 0.3rem; }
         .webtoon-author { font-size: 0.9rem; opacity: 0.7; }
         .empty-message { text-align: center; grid-column: 1 / -1; padding: 3rem; opacity: 0.7; }
-
-        /* 모달 창 */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--modal-overlay); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-content { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; transform: translateY(-20px); transition: transform 0.3s ease-out; border: 1px solid var(--border-color); }
+        .modal-content { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; transform: translateY(-20px); transition: transform 0.3s ease-out; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
         .close-btn { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; background: none; border: none; color: var(--text-color); cursor: pointer; }
         .modal-content h2 { margin-bottom: 1.5rem; text-align: center; color: var(--accent-color); }
         .input-group { margin-bottom: 1rem; }
         .input-group label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: bold; }
-        .input-group input { width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--input-bg); color: var(--text-color); font-size: 1rem; }
-        .input-group input:focus { outline: none; border-color: var(--accent-color); }
+        .input-group input { width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--input-bg); color: var(--text-color); }
         .btn-submit { width: 100%; padding: 0.8rem; background-color: var(--accent-color); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 1rem; }
-        .btn-submit:hover { background-color: var(--accent-hover); }
         .modal-footer { margin-top: 1.5rem; text-align: center; font-size: 0.9rem; }
         .modal-footer a { color: var(--accent-color); font-weight: 600; cursor: pointer; }
-
         footer { background-color: var(--card-bg); border-top: 1px solid var(--border-color); text-align: center; padding: 2rem; margin-top: 4rem; }
     </style>
 </head>
 <body>
-
     <header>
         <div class="nav-container">
             <a href="#" class="logo">노넴툰 <span>무명 작가들의 웹툰</span></a>
             <nav class="nav-links">
-                <a href="#">연재작</a>
-                <a href="#">베스트</a>
-                
-                <!-- 마이페이지 링크 (로그인 시에만 보이게 설정) -->
                 <a href="mypage.html" id="mypageLink" style="display: none; font-weight: bold;">마이페이지</a>
-                
                 <span id="userGreeting" class="user-greeting" style="display: none;"></span>
                 <a href="javascript:void(0)" id="authActionBtn" class="auth-btn" onclick="openLoginModal()">로그인</a>
                 <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()">🌙 다크 모드</button>
@@ -120,136 +68,88 @@
 
     <main class="webtoon-section">
         <h2 class="section-title">✨ 새로 올라온 작품</h2>
-        <!-- 자바스크립트가 여기에 진짜 웹툰을 채워넣을 겁니다 -->
         <div class="webtoon-grid" id="webtoonGrid">
             <div class="empty-message">작품을 불러오는 중입니다... 🔄</div>
         </div>
     </main>
 
-    <!-- 로그인 & 회원가입 모달 -->
     <div class="modal-overlay" id="authModal" onclick="closeOnOutsideClick(event)">
         <div class="modal-content">
             <button class="close-btn" onclick="closeAuthModal()">&times;</button>
             <h2 id="modalTitle">로그인</h2>
             <form id="authForm">
                 <div class="input-group" id="nicknameGroup" style="display: none;">
-                    <label for="nickname">작가/독자 닉네임</label>
-                    <input type="text" id="nickname" placeholder="사용할 닉네임을 입력하세요">
+                    <label>닉네임</label><input type="text" id="nickname">
                 </div>
-                <div class="input-group">
-                    <label for="email">이메일</label>
-                    <input type="email" id="email" placeholder="example@email.com" required>
-                </div>
-                <div class="input-group">
-                    <label for="password">비밀번호</label>
-                    <input type="password" id="password" placeholder="6자리 이상 비밀번호" required>
-                </div>
+                <div class="input-group"><label>이메일</label><input type="email" id="email" required></div>
+                <div class="input-group"><label>비밀번호</label><input type="password" id="password" required></div>
                 <button type="submit" class="btn-submit" id="submitBtn">로그인하기</button>
             </form>
-            <div class="modal-footer">
-                <span id="switchPrompt">아직 계정이 없으신가요?</span>
-                <a href="javascript:void(0)" id="switchModeBtn" onclick="toggleAuthMode()">회원가입</a>
-            </div>
+            <div class="modal-footer"><span id="switchPrompt">계정이 없으신가요?</span> <a href="javascript:void(0)" id="switchModeBtn" onclick="toggleAuthMode()">회원가입</a></div>
         </div>
     </div>
+    <footer><p>&copy; 2026 노넴툰(No Name Toon). All rights reserved.</p></footer>
 
-    <footer>
-        <p>&copy; 2026 노넴툰(No Name Toon). All rights reserved.</p>
-    </footer>
-
-    <!-- Firebase SDK & 메인 로직 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        // 데이터를 불러오기 위한 함수들 추가 (getDocs, collection, query, orderBy)
         import { getFirestore, doc, setDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc",
-            authDomain: "nonametoon-907aa.firebaseapp.com",
-            projectId: "nonametoon-907aa",
-            storageBucket: "nonametoon-907aa.firebasestorage.app",
-            messagingSenderId: "581148914100",
-            appId: "1:581148914100:web:03e65a96e29086eff682e1",
-            measurementId: "G-Q5P01H9MKZ"
+            apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc", authDomain: "nonametoon-907aa.firebaseapp.com", projectId: "nonametoon-907aa",
+            storageBucket: "nonametoon-907aa.firebasestorage.app", messagingSenderId: "581148914100", appId: "1:581148914100:web:03e65a96e29086eff682e1", measurementId: "G-Q5P01H9MKZ"
         };
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        const authModal = document.getElementById('authModal'); const modalTitle = document.getElementById('modalTitle');
+        const nicknameGroup = document.getElementById('nicknameGroup'); const nicknameInput = document.getElementById('nickname');
+        const emailInput = document.getElementById('email'); const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submitBtn'); const switchPrompt = document.getElementById('switchPrompt');
+        const switchModeBtn = document.getElementById('switchModeBtn'); const authActionBtn = document.getElementById('authActionBtn');
+        const userGreeting = document.getElementById('userGreeting'); const heroUploadBtn = document.getElementById('heroUploadBtn');
+        const webtoonGrid = document.getElementById('webtoonGrid'); const mypageLink = document.getElementById('mypageLink');
 
-        const authModal = document.getElementById('authModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const nicknameGroup = document.getElementById('nicknameGroup');
-        const nicknameInput = document.getElementById('nickname');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const submitBtn = document.getElementById('submitBtn');
-        const switchPrompt = document.getElementById('switchPrompt');
-        const switchModeBtn = document.getElementById('switchModeBtn');
-        const authActionBtn = document.getElementById('authActionBtn');
-        const userGreeting = document.getElementById('userGreeting');
-        const heroUploadBtn = document.getElementById('heroUploadBtn');
-        const webtoonGrid = document.getElementById('webtoonGrid');
-        const mypageLink = document.getElementById('mypageLink'); // 마이페이지 링크 요소 가져오기
+        let isSignUpMode = false; let currentUser = null;
 
-        let isSignUpMode = false;
-        let currentUser = null;
-
-        // 1. 진짜 웹툰 데이터 불러오기 함수
         async function loadWebtoons() {
             try {
-                // 'webtoons' 컬렉션에서 최신순(created_at 내림차순)으로 데이터 가져오기
                 const q = query(collection(db, "webtoons"), orderBy("created_at", "desc"));
                 const querySnapshot = await getDocs(q);
-                
-                webtoonGrid.innerHTML = ''; // 로딩 메시지 지우기
+                webtoonGrid.innerHTML = '';
+                if (querySnapshot.empty) { webtoonGrid.innerHTML = '<div class="empty-message">아직 등록된 작품이 없습니다.</div>'; return; }
 
-                if (querySnapshot.empty) {
-                    webtoonGrid.innerHTML = '<div class="empty-message">아직 등록된 작품이 없습니다. 첫 작품의 주인공이 되어보세요!</div>';
-                    return;
-                }
-
-                // 가져온 데이터들을 하나씩 카드로 만들어서 화면에 붙이기
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     const card = document.createElement('div');
                     card.className = 'webtoon-card';
                     
-                    // 썸네일 이미지가 깨질 경우를 대비해 onerror 속성 추가
+                    // 빈 값이 와도 깨지지 않도록 방어 코드 적용
+                    const thumbUrl = data.thumbnail_url || 'https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image';
+                    const authorName = data.author_nickname || data.author || '무명작가';
+
                     card.innerHTML = `
-                        <img src="${data.thumbnail_url}" alt="웹툰" class="webtoon-thumbnail" onerror="this.src='https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image'">
+                        <img src="${thumbUrl}" alt="웹툰" class="webtoon-thumbnail" onerror="this.src='https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image'">
                         <div class="webtoon-info">
                             <div class="webtoon-title">${data.title}</div>
-                            <div class="webtoon-author">작가: ${data.author_nickname}</div>
+                            <div class="webtoon-author">작가: ${authorName}</div>
                         </div>
                     `;
                     
-                    // 작품 클릭 시 상세 페이지로 이동 (아직 안 만들었지만 준비!)
-                    card.onclick = () => alert(`'${data.title}' 상세 페이지로 이동합니다! (다음 단계에서 만들 예정입니다)`);
-                    
+                    // 상세 페이지로 이동하도록 수정 완료!
+                    card.onclick = () => { window.location.href = `detail.html?id=${doc.id}`; };
                     webtoonGrid.appendChild(card);
                 });
-            } catch (error) {
-                console.error("작품 불러오기 실패:", error);
-                webtoonGrid.innerHTML = '<div class="empty-message">작품을 불러오는데 실패했습니다. 데이터베이스 권한을 확인해주세요.</div>';
-            }
+            } catch (error) { console.error(error); webtoonGrid.innerHTML = '<div class="empty-message">작품을 불러오는데 실패했습니다.</div>'; }
         }
-
-        // 페이지가 켜지자마자 웹툰 로드!
         loadWebtoons();
 
-        // [아래는 기존과 동일한 로그인/회원가입 로직]
         window.openLoginModal = () => { authModal.classList.add('active'); document.body.style.overflow = 'hidden'; };
         window.closeAuthModal = () => { authModal.classList.remove('active'); document.body.style.overflow = 'auto'; };
         window.closeOnOutsideClick = (e) => { if (e.target === authModal) closeAuthModal(); };
         window.toggleAuthMode = () => {
             isSignUpMode = !isSignUpMode;
-            if (isSignUpMode) {
-                modalTitle.innerText = "노넴툰 회원가입"; nicknameGroup.style.display = "block"; nicknameInput.required = true; submitBtn.innerText = "가입 완료하기"; switchPrompt.innerText = "이미 계정이 있으신가요?"; switchModeBtn.innerText = "로그인";
-            } else {
-                modalTitle.innerText = "노넴툰 로그인"; nicknameGroup.style.display = "none"; nicknameInput.required = false; submitBtn.innerText = "로그인하기"; switchPrompt.innerText = "아직 계정이 없으신가요?"; switchModeBtn.innerText = "회원가입";
-            }
+            if (isSignUpMode) { modalTitle.innerText = "회원가입"; nicknameGroup.style.display = "block"; nicknameInput.required = true; submitBtn.innerText = "가입 완료하기"; switchModeBtn.innerText = "로그인"; } 
+            else { modalTitle.innerText = "로그인"; nicknameGroup.style.display = "none"; nicknameInput.required = false; submitBtn.innerText = "로그인하기"; switchModeBtn.innerText = "회원가입"; }
         };
 
         document.getElementById('authForm').addEventListener('submit', async (e) => {
@@ -260,30 +160,21 @@
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                     await updateProfile(userCredential.user, { displayName: nickname });
                     await setDoc(doc(db, "users", userCredential.user.uid), { email, nickname, role: "reader", createdAt: new Date().toISOString() });
-                    alert(`가입 완료! 환영합니다, ${nickname}님.`);
-                } else {
-                    await signInWithEmailAndPassword(auth, email, password);
-                    alert("로그인되었습니다!");
-                }
-                closeAuthModal();
-                emailInput.value = ""; passwordInput.value = ""; nicknameInput.value = "";
+                    alert("가입 완료!");
+                } else { await signInWithEmailAndPassword(auth, email, password); alert("로그인되었습니다!"); }
+                closeAuthModal(); emailInput.value = ""; passwordInput.value = ""; nicknameInput.value = "";
             } catch (error) { alert(`오류 발생: ${error.message}`); }
         });
 
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             if (user) {
-                // 로그인 상태일 때 마이페이지 보이게 하기
                 mypageLink.style.display = "inline";
-                
                 const name = user.displayName || user.email.split('@')[0];
                 userGreeting.innerText = `👋 ${name}님`; userGreeting.style.display = "inline";
                 authActionBtn.innerText = "로그아웃"; authActionBtn.onclick = async () => { await signOut(auth); alert("로그아웃되었습니다."); };
             } else {
-                // 로그아웃 상태일 때 마이페이지 숨기기
-                mypageLink.style.display = "none";
-                
-                userGreeting.style.display = "none";
+                mypageLink.style.display = "none"; userGreeting.style.display = "none";
                 authActionBtn.innerText = "로그인"; authActionBtn.onclick = () => openLoginModal();
             }
         });
@@ -294,10 +185,8 @@
         });
     </script>
     <script>
-        const htmlEl = document.documentElement;
-        const themeBtn = document.getElementById('themeToggle');
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        htmlEl.setAttribute('data-theme', savedTheme);
+        const htmlEl = document.documentElement; const themeBtn = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('theme') || 'light'; htmlEl.setAttribute('data-theme', savedTheme);
         themeBtn.innerText = savedTheme === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드';
         function toggleTheme() {
             const next = htmlEl.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
