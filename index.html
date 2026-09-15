@@ -31,7 +31,6 @@
             --modal-overlay: rgba(0, 0, 0, 0.7);
         }
 
-        /* 기본 설정 */
         * {
             margin: 0;
             padding: 0;
@@ -51,7 +50,7 @@
             color: inherit;
         }
 
-        /* 헤더 & 네비게이션 */
+        /* 헤더 */
         header {
             background-color: var(--header-bg);
             border-bottom: 1px solid var(--border-color);
@@ -84,7 +83,7 @@
 
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 1.5rem;
             align-items: center;
         }
 
@@ -92,20 +91,26 @@
             color: var(--accent-color);
         }
         
-        .login-btn {
+        .auth-btn {
             font-weight: 700;
             cursor: pointer;
+        }
+
+        .user-greeting {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--accent-color);
         }
 
         .theme-toggle-btn {
             background: none;
             border: 2px solid var(--border-color);
             color: var(--text-color);
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.8rem;
             border-radius: 20px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .theme-toggle-btn:hover {
@@ -166,7 +171,7 @@
         .webtoon-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 0.3rem; }
         .webtoon-author { font-size: 0.9rem; opacity: 0.7; }
 
-        /* --- 로그인 모달 (추가된 부분) --- */
+        /* 모달 창 */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -180,7 +185,6 @@
             transition: opacity 0.3s, visibility 0.3s;
         }
 
-        /* 모달 활성화 클래스 */
         .modal-overlay.active {
             opacity: 1;
             visibility: visible;
@@ -268,17 +272,11 @@
         }
 
         .modal-footer a {
-            color: var(--text-color);
-            opacity: 0.8;
-            margin: 0 5px;
-        }
-        
-        .modal-footer a:hover {
             color: var(--accent-color);
-            opacity: 1;
+            font-weight: 600;
+            cursor: pointer;
         }
 
-        /* 푸터 */
         footer {
             background-color: var(--card-bg);
             border-top: 1px solid var(--border-color);
@@ -286,7 +284,6 @@
             padding: 2rem;
             margin-top: 4rem;
         }
-
     </style>
 </head>
 <body>
@@ -298,9 +295,11 @@
             <nav class="nav-links">
                 <a href="#">연재작</a>
                 <a href="#">베스트</a>
-                <a href="#">자유게시판</a>
-                <!-- 로그인 버튼 추가 -->
-                <a href="#" class="login-btn" onclick="openLoginModal()">로그인</a>
+                
+                <!-- 인증 상태에 따라 변경되는 영역 -->
+                <span id="userGreeting" class="user-greeting" style="display: none;"></span>
+                <a href="javascript:void(0)" id="authActionBtn" class="auth-btn" onclick="openLoginModal()">로그인</a>
+                
                 <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()">🌙 다크 모드</button>
             </nav>
         </div>
@@ -310,58 +309,56 @@
     <section class="hero">
         <h1>누구나 웹툰 작가가 될 수 있는 곳</h1>
         <p>당신의 머릿속에만 있던 이야기, 이제 '노넴툰'에서 마음껏 펼쳐보세요.</p>
-        <button class="btn-upload" onclick="openLoginModal()">✏️ 내 작품 올리기</button>
+        <button class="btn-upload" id="heroUploadBtn">✏️ 내 작품 올리기</button>
     </section>
 
-    <!-- 실시간 업데이트 웹툰 -->
+    <!-- 실시간 웹툰 목록 -->
     <main class="webtoon-section">
         <h2 class="section-title">✨ 새로 올라온 작품</h2>
         <div class="webtoon-grid">
-            <!-- 웹툰 카드들 -->
             <div class="webtoon-card">
-                <img src="https://via.placeholder.com/300x400/eeeeee/999999?text=Webtoon+1" alt="웹툰 썸네일" class="webtoon-thumbnail">
+                <img src="https://via.placeholder.com/300x400/6366f1/ffffff?text=Webtoon+1" alt="웹툰" class="webtoon-thumbnail">
                 <div class="webtoon-info"><div class="webtoon-title">달빛 아래 그림자</div><div class="webtoon-author">작가: 무명A</div></div>
             </div>
             <div class="webtoon-card">
-                <img src="https://via.placeholder.com/300x400/eeeeee/999999?text=Webtoon+2" alt="웹툰 썸네일" class="webtoon-thumbnail">
+                <img src="https://via.placeholder.com/300x400/6366f1/ffffff?text=Webtoon+2" alt="웹툰" class="webtoon-thumbnail">
                 <div class="webtoon-info"><div class="webtoon-title">오늘부터 마법사</div><div class="webtoon-author">작가: 글쟁이</div></div>
             </div>
             <div class="webtoon-card">
-                <img src="https://via.placeholder.com/300x400/eeeeee/999999?text=Webtoon+3" alt="웹툰 썸네일" class="webtoon-thumbnail">
+                <img src="https://via.placeholder.com/300x400/6366f1/ffffff?text=Webtoon+3" alt="웹툰" class="webtoon-thumbnail">
                 <div class="webtoon-info"><div class="webtoon-title">용사의 은퇴 라이프</div><div class="webtoon-author">작가: 백수용사</div></div>
-            </div>
-            <div class="webtoon-card">
-                <img src="https://via.placeholder.com/300x400/eeeeee/999999?text=Webtoon+4" alt="웹툰 썸네일" class="webtoon-thumbnail">
-                <div class="webtoon-info"><div class="webtoon-title">평범한 학교생활</div><div class="webtoon-author">작가: 김노넴</div></div>
-            </div>
-            <div class="webtoon-card">
-                <img src="https://via.placeholder.com/300x400/eeeeee/999999?text=Webtoon+5" alt="웹툰 썸네일" class="webtoon-thumbnail">
-                <div class="webtoon-info"><div class="webtoon-title">우주 정거장 101</div><div class="webtoon-author">작가: 스페이스</div></div>
             </div>
         </div>
     </main>
 
-    <!-- 로그인 모달 창 (새로 추가됨) -->
-    <div class="modal-overlay" id="loginModal" onclick="closeOnOutsideClick(event)">
+    <!-- 로그인 & 회원가입 모달 -->
+    <div class="modal-overlay" id="authModal" onclick="closeOnOutsideClick(event)">
         <div class="modal-content">
-            <button class="close-btn" onclick="closeLoginModal()">&times;</button>
-            <h2>노넴툰 로그인</h2>
+            <button class="close-btn" onclick="closeAuthModal()">&times;</button>
+            <h2 id="modalTitle">로그인</h2>
             
-            <!-- 로그인 폼 -->
-            <form onsubmit="handleLogin(event)">
+            <form id="authForm">
+                <!-- 닉네임 필드 (회원가입 모드일 때만 표시) -->
+                <div class="input-group" id="nicknameGroup" style="display: none;">
+                    <label for="nickname">작가/독자 닉네임</label>
+                    <input type="text" id="nickname" placeholder="사용할 닉네임을 입력하세요">
+                </div>
+
                 <div class="input-group">
                     <label for="email">이메일</label>
                     <input type="email" id="email" placeholder="example@email.com" required>
                 </div>
                 <div class="input-group">
                     <label for="password">비밀번호</label>
-                    <input type="password" id="password" placeholder="비밀번호를 입력하세요" required>
+                    <input type="password" id="password" placeholder="6자리 이상 비밀번호" required>
                 </div>
-                <button type="submit" class="btn-submit">로그인</button>
+
+                <button type="submit" class="btn-submit" id="submitBtn">로그인하기</button>
             </form>
 
             <div class="modal-footer">
-                <a href="#">비밀번호 찾기</a> | <a href="#">회원가입</a>
+                <span id="switchPrompt">아직 계정이 없으신가요?</span>
+                <a href="javascript:void(0)" id="switchModeBtn" onclick="toggleAuthMode()">회원가입</a>
             </div>
         </div>
     </div>
@@ -369,60 +366,194 @@
     <!-- 푸터 -->
     <footer>
         <p>&copy; 2026 노넴툰(No Name Toon). All rights reserved.</p>
-        <p style="font-size: 0.8rem; margin-top: 10px; opacity: 0.7;">본 사이트는 무명 작가들의 창작 활동을 응원합니다.</p>
     </footer>
 
-    <!-- 자바스크립트 -->
+    <!-- Firebase SDK (모듈 방식) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged,
+            updateProfile 
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc,
+            getDoc 
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // 사용자 제공 Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc",
+            authDomain: "nonametoon-907aa.firebaseapp.com",
+            projectId: "nonametoon-907aa",
+            storageBucket: "nonametoon-907aa.firebasestorage.app",
+            messagingSenderId: "581148914100",
+            appId: "1:581148914100:web:03e65a96e29086eff682e1",
+            measurementId: "G-Q5P01H9MKZ"
+        };
+
+        // Firebase 초기화
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // UI 요소
+        const authModal = document.getElementById('authModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const nicknameGroup = document.getElementById('nicknameGroup');
+        const nicknameInput = document.getElementById('nickname');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submitBtn');
+        const switchPrompt = document.getElementById('switchPrompt');
+        const switchModeBtn = document.getElementById('switchModeBtn');
+        const authActionBtn = document.getElementById('authActionBtn');
+        const userGreeting = document.getElementById('userGreeting');
+        const heroUploadBtn = document.getElementById('heroUploadBtn');
+
+        let isSignUpMode = false;
+        let currentUser = null;
+
+        // 모달 열기/닫기
+        window.openLoginModal = function() {
+            authModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeAuthModal = function() {
+            authModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        };
+
+        window.closeOnOutsideClick = function(event) {
+            if (event.target === authModal) {
+                closeAuthModal();
+            }
+        };
+
+        // 로그인 <-> 회원가입 모드 전환
+        window.toggleAuthMode = function() {
+            isSignUpMode = !isSignUpMode;
+            if (isSignUpMode) {
+                modalTitle.innerText = "노넴툰 회원가입";
+                nicknameGroup.style.display = "block";
+                nicknameInput.required = true;
+                submitBtn.innerText = "가입 완료하기";
+                switchPrompt.innerText = "이미 계정이 있으신가요?";
+                switchModeBtn.innerText = "로그인";
+            } else {
+                modalTitle.innerText = "노넴툰 로그인";
+                nicknameGroup.style.display = "none";
+                nicknameInput.required = false;
+                submitBtn.innerText = "로그인하기";
+                switchPrompt.innerText = "아직 계정이 없으신가요?";
+                switchModeBtn.innerText = "회원가입";
+            }
+        };
+
+        // 폼 제출 (회원가입 또는 로그인)
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            const nickname = nicknameInput.value.trim();
+
+            try {
+                if (isSignUpMode) {
+                    // 1. Firebase Auth 회원가입
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+
+                    // 닉네임 프로필 업데이트
+                    await updateProfile(user, { displayName: nickname });
+
+                    // 2. Firestore 'users' 컬렉션에 사용자 정보 저장
+                    await setDoc(doc(db, "users", user.uid), {
+                        email: email,
+                        nickname: nickname,
+                        role: "reader",
+                        createdAt: new Date().toISOString()
+                    });
+
+                    alert(`환영합니다, ${nickname} 작가/독자님! 가입이 완료되었습니다.`);
+                } else {
+                    // Firebase Auth 로그인
+                    await signInWithEmailAndPassword(auth, email, password);
+                    alert("성공적으로 로그인되었습니다!");
+                }
+                closeAuthModal();
+                emailInput.value = "";
+                passwordInput.value = "";
+                nicknameInput.value = "";
+            } catch (error) {
+                console.error("인증 에러:", error);
+                if (error.code === 'auth/email-already-in-use') {
+                    alert('이미 사용 중인 이메일 주소입니다.');
+                } else if (error.code === 'auth/weak-password') {
+                    alert('비밀번호는 최소 6자 이상이어야 합니다.');
+                } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+                    alert('이메일 또는 비밀번호가 일치하지 않습니다.');
+                } else {
+                    alert(`오류가 발생했습니다: ${error.message}`);
+                }
+            }
+        });
+
+        // 실시간 로그인 상태 감지
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user) {
+                // 로그인된 상태
+                const name = user.displayName || user.email.split('@')[0];
+                userGreeting.innerText = `👋 ${name}님`;
+                userGreeting.style.display = "inline";
+                authActionBtn.innerText = "로그아웃";
+                authActionBtn.onclick = async () => {
+                    await signOut(auth);
+                    alert("로그아웃되었습니다.");
+                };
+            } else {
+                // 로그아웃된 상태
+                userGreeting.style.display = "none";
+                authActionBtn.innerText = "로그인";
+                authActionBtn.onclick = () => openLoginModal();
+            }
+        });
+
+        // 작품 올리기 버튼 클릭 동작
+        heroUploadBtn.addEventListener('click', () => {
+            if (!currentUser) {
+                alert('작품을 등록하려면 먼저 로그인이 필요합니다!');
+                openLoginModal();
+            } else {
+                alert(`[작품 업로드 페이지]\n${currentUser.displayName || '작가'}님의 작품 등록 화면으로 이동합니다.`);
+            }
+        });
+    </script>
+
+    <!-- 테마 토글 스크립트 -->
     <script>
-        // --- 테마 설정 로직 ---
         const htmlEl = document.documentElement;
         const themeBtn = document.getElementById('themeToggle');
         const savedTheme = localStorage.getItem('theme') || 'light';
-        
         htmlEl.setAttribute('data-theme', savedTheme);
-        updateButtonText(savedTheme);
+        updateThemeBtn(savedTheme);
 
         function toggleTheme() {
-            const currentTheme = htmlEl.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            htmlEl.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateButtonText(newTheme);
+            const current = htmlEl.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            htmlEl.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            updateThemeBtn(next);
         }
 
-        function updateButtonText(theme) {
-            themeBtn.innerHTML = theme === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드';
-        }
-
-        // --- 로그인 모달 로직 ---
-        const loginModal = document.getElementById('loginModal');
-
-        // 모달 열기
-        function openLoginModal() {
-            loginModal.classList.add('active');
-            // 스크롤 방지 (선택사항)
-            document.body.style.overflow = 'hidden'; 
-        }
-
-        // 모달 닫기
-        function closeLoginModal() {
-            loginModal.classList.remove('active');
-            // 스크롤 복구
-            document.body.style.overflow = 'auto'; 
-        }
-
-        // 모달 바깥 배경 클릭 시 닫히게 하기
-        function closeOnOutsideClick(event) {
-            if (event.target === loginModal) {
-                closeLoginModal();
-            }
-        }
-
-        // 로그인 폼 제출 시 이벤트 (가짜 작동)
-        function handleLogin(event) {
-            event.preventDefault(); // 페이지 새로고침 방지
-            alert('입력하신 정보로 로그인을 시도합니다!\n(실제 기능은 백엔드 서버 연결 후 작동합니다.)');
-            closeLoginModal();
+        function updateThemeBtn(theme) {
+            themeBtn.innerText = theme === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드';
         }
     </script>
 </body>
