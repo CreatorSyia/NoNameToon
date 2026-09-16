@@ -136,6 +136,17 @@
         <h2 class="upload-title">새 작품 등록하기</h2>
         
         <form id="uploadForm">
+            <!-- 연재 상태 선택 추가 -->
+            <div class="input-group">
+                <label for="status">연재 상태</label>
+                <select id="status" required>
+                    <option value="연재중" selected>연재중</option>
+                    <option value="휴재중">휴재중</option>
+                    <option value="시즌완결">시즌완결</option>
+                    <option value="완결">완결</option>
+                </select>
+            </div>
+
             <div class="input-group">
                 <label for="title">웹툰 제목</label>
                 <input type="text" id="title" placeholder="작품의 제목을 입력해주세요" required>
@@ -216,6 +227,7 @@
             submitBtn.disabled = true;
             submitBtn.innerText = "등록 중...";
 
+            const status = document.getElementById('status').value;
             const title = document.getElementById('title').value;
             const genre = document.getElementById('genre').value;
             const description = document.getElementById('description').value;
@@ -230,7 +242,9 @@
                     thumbnail_url: thumbnail,
                     author_id: currentUser.uid,
                     author_nickname: currentUser.displayName || "무명작가",
-                    status: "ongoing", // 기본 연재 상태
+                    status: status, // 선택한 연재 상태 기록
+                    total_views: 0, // 기본 조회수 0으로 시작
+                    like_count: 0, // 기본 좋아요 수 0으로 시작
                     created_at: serverTimestamp() // 현재 시간 자동 기록
                 });
 
