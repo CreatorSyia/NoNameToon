@@ -18,7 +18,18 @@
         .thumbnail { width: 220px; height: 300px; border-radius: 8px; object-fit: cover; background-color: #ddd; flex-shrink: 0; }
         .info-box { flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-start; }
         
-        .genre-badge { display: inline-block; padding: 0.3rem 0.8rem; background-color: var(--accent-color); color: white; border-radius: 20px; font-size: 0.85rem; font-weight: bold; margin-bottom: 0.5rem; width: fit-content; }
+        /* 배지 컨테이너 및 장르 배지 */
+        .badges { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .genre-badge { padding: 0.3rem 0.8rem; background-color: var(--accent-color); color: white; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+        
+        /* 연재 상태 배지 스타일 설정 */
+        .status-badge { padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: bold; color: white; }
+        .status-ongoing { background-color: #ef4444; } /* 연재중 (빨강) */
+        .status-hiatus { background-color: #6b7280; } /* 휴재중 (회색) */
+        .status-season-end { background-color: #3b82f6; } /* 시즌완결 (파랑) */
+        .status-completed { background-color: #ffffff; color: #1f2937; border: 1px solid #d1d5db; } /* 완결 (하양) */
+        [data-theme="dark"] .status-completed { background-color: #1f2937; color: #f3f4f6; border: 1px solid #4b5563; }
+
         .title { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
         .author { font-size: 1.1rem; opacity: 0.8; margin-bottom: 1rem; }
         
@@ -79,7 +90,7 @@
         
         let currentUser = null;
         let isLiked = false;
-        let isAdmin = false; // 관리자 여부 변수 추가
+        let isAdmin = false;
 
         async function initPage() {
             if (!webtoonId) { alert("잘못된 접근입니다."); window.location.href = "index.html"; return; }
@@ -98,10 +109,20 @@
                 const totalViews = wtData.total_views || 0;
                 let totalLikes = wtData.like_count || 0;
 
+                // 상태에 따른 클래스 부여
+                const status = wtData.status || "연재중";
+                let statusClass = "status-ongoing";
+                if (status === "휴재중") statusClass = "status-hiatus";
+                else if (status === "시즌완결") statusClass = "status-season-end";
+                else if (status === "완결") statusClass = "status-completed";
+
                 webtoonHeader.innerHTML = `
                     <img src="${thumbUrl}" alt="썸네일" class="thumbnail" onerror="this.src='https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image'">
                     <div class="info-box">
-                        <span class="genre-badge">${wtData.genre || '장르 없음'}</span>
+                        <div class="badges">
+                            <span class="genre-badge">${wtData.genre || '장르 없음'}</span>
+                            <span class="status-badge ${statusClass}">${status}</span>
+                        </div>
                         <h1 class="title">${wtData.title || '제목 없음'}</h1>
                         <div class="author">글/그림 : ${wtData.author_nickname || '무명작가'}</div>
                         
@@ -161,24 +182,20 @@
                     });
                 }
 
-                // 권한 체크 및 관리자 확인
                 onAuthStateChanged(auth, async (user) => {
                     currentUser = user;
                     
                     if (user) {
-                        // 관리자(admin) 여부 확인
                         const userDoc = await getDoc(doc(db, "users", user.uid));
                         if (userDoc.exists() && userDoc.data().role === "admin") {
                             isAdmin = true;
                         }
 
-                        // 본인 작품이거나 관리자일 경우 수정 메뉴 노출
                         if (user.uid === wtData.author_id || isAdmin) {
                             document.getElementById('authorMenu').style.display = 'flex';
                             document.getElementById('addEpisodeBtn').onclick = () => { window.location.href = `upload_episode.html?webtoonId=${webtoonId}`; };
                             document.getElementById('editWebtoonBtn').onclick = () => { window.location.href = `edit_webtoon.html?id=${webtoonId}`; };
                             
-                            // 운영자일 경우 시각적 표시
                             if (isAdmin && user.uid !== wtData.author_id) {
                                 document.getElementById('editWebtoonBtn').innerText = "👑 (운영자) 작품 수정/삭제";
                             }
@@ -186,7 +203,6 @@
                             document.getElementById('authorMenu').style.display = 'none';
                         }
 
-                        // 좋아요 기능
                         const likeRef = doc(db, "likes", `${webtoonId}_${user.uid}`);
                         const likeDoc = await getDoc(likeRef);
                         
