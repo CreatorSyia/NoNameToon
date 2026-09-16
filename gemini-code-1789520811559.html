@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>노넴툰(No Name Toon) - 무명 작가들의 웹툰</title>
+    <style>
+        :root { --bg-color: #f8f9fa; --text-color: #212529; --header-bg: #ffffff; --card-bg: #ffffff; --border-color: #dee2e6; --accent-color: #6366f1; --accent-hover: #4f46e5; --input-bg: #ffffff; --modal-overlay: rgba(0, 0, 0, 0.5); }
+        [data-theme="dark"] { --bg-color: #121212; --text-color: #e0e0e0; --header-bg: #1e1e1e; --card-bg: #2d2d2d; --border-color: #404040; --accent-color: #818cf8; --accent-hover: #6366f1; --input-bg: #1e1e1e; --modal-overlay: rgba(0, 0, 0, 0.7); }
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
+        a { text-decoration: none; color: inherit; }
+        header { background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
+        .nav-container { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: var(--accent-color); }
+        .logo span { font-size: 0.9rem; font-weight: 400; color: var(--text-color); margin-left: 10px; }
+        .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+        .nav-links a:hover { color: var(--accent-color); }
+        .auth-btn { font-weight: 700; cursor: pointer; }
+        .user-greeting { font-size: 0.95rem; font-weight: 600; color: var(--accent-color); }
+        .theme-toggle-btn { background: none; border: 2px solid var(--border-color); color: var(--text-color); padding: 0.4rem 0.8rem; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+        
+        .hero { text-align: center; padding: 3rem 2rem; background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); }
+        .hero h1 { font-size: 2.2rem; margin-bottom: 0.8rem; }
+        .hero p { font-size: 1rem; margin-bottom: 1.5rem; opacity: 0.8; }
+        .btn-upload { background-color: var(--accent-color); color: white; padding: 0.8rem 2rem; border: none; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: inline-block; margin-top: 1rem; }
+
+        /* 정사각형 배너 슬라이드 스타일 */
+        .banner-container { position: relative; width: 100%; max-width: 450px; aspect-ratio: 1 / 1; margin: 2rem auto; border-radius: 16px; overflow: hidden; background-color: #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .banner-track { display: flex; width: 100%; height: 100%; transition: transform 0.5s ease-in-out; }
+        .banner-slide { min-width: 100%; height: 100%; position: relative; cursor: pointer; }
+        .banner-slide img { width: 100%; height: 100%; object-fit: cover; }
+        .banner-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 2rem 1.5rem 1.5rem; background: linear-gradient(transparent, rgba(0,0,0,0.85)); color: white; text-align: left; }
+        .banner-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 0.3rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
+        .banner-desc { font-size: 0.95rem; opacity: 0.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
+        .banner-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; z-index: 10; transition: background 0.3s; }
+        .banner-btn:hover { background: rgba(0,0,0,0.8); }
+        .banner-prev { left: 15px; }
+        .banner-next { right: 15px; }
+        .banner-dots { position: absolute; bottom: 15px; right: 20px; display: flex; gap: 6px; z-index: 10; }
+        .banner-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; }
+        .banner-dot.active { background: white; }
+
+        /* 공지사항 스타일 */
+        .notice-container { max-width: 600px; margin: 0 auto 1.5rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: left; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .notice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.6rem; color: var(--accent-color); font-weight: bold; font-size: 1.1rem; }
+        .notice-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .notice-item { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.8rem; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; }
+        .notice-item:hover { background-color: rgba(99, 102, 241, 0.05); }
+        .notice-item-title { font-size: 0.95rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 75%; color: var(--text-color); }
+        .notice-item:hover .notice-item-title { color: var(--accent-color); text-decoration: underline; }
+        .notice-item-date { font-size: 0.85rem; opacity: 0.6; }
+
+        /* 웹툰 목록 섹션 */
+        .webtoon-section { max-width: 1200px; margin: 3rem auto; padding: 0 2rem; }
+        .section-title { font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 700; }
+        .webtoon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
+        .webtoon-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; }
+        .webtoon-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); border-color: var(--accent-color); }
+        .webtoon-thumbnail { width: 100%; height: 260px; background-color: #ddd; object-fit: cover; }
+        .webtoon-info { padding: 1.2rem; background-color: var(--card-bg); flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+        .webtoon-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 0.4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .webtoon-author { font-size: 0.9rem; opacity: 0.7; }
+        
+        .empty-message { text-align: center; grid-column: 1 / -1; padding: 2rem; opacity: 0.7; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--modal-overlay); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content { background-color: var(--card-bg); padding: 2.5rem; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; transform: translateY(-20px); transition: transform 0.3s ease-out; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; background: none; border: none; color: var(--text-color); cursor: pointer; }
+        .modal-content h2 { margin-bottom: 1.5rem; text-align: center; color: var(--accent-color); }
+        .input-group { margin-bottom: 1rem; }
+        .input-group label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: bold; }
+        .input-group input { width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--input-bg); color: var(--text-color); }
+        .btn-submit { width: 100%; padding: 0.8rem; background-color: var(--accent-color); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 1rem; }
+        .modal-footer { margin-top: 1.5rem; text-align: center; font-size: 0.9rem; }
+        .modal-footer a { color: var(--accent-color); font-weight: 600; cursor: pointer; }
+        footer { background-color: var(--card-bg); border-top: 1px solid var(--border-color); text-align: center; padding: 2rem; margin-top: 4rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="#" class="logo">노넴툰 <span>무명 작가들의 웹툰</span></a>
+            <nav class="nav-links">
+                <a href="mypage.html" id="mypageLink" style="display: none; font-weight: bold;">마이페이지</a>
+                <span id="userGreeting" class="user-greeting" style="display: none;"></span>
+                <a href="javascript:void(0)" id="authActionBtn" class="auth-btn" onclick="openLoginModal()">로그인</a>
+                <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()">🌙 다크 모드</button>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1>누구나 웹툰 작가가 될 수 있는 곳</h1>
+        <p>당신의 머릿속에만 있던 이야기, 이제 '노넴툰'에서 마음껏 펼쳐보세요.</p>
+        
+        <!-- 1. 정사각형 배너 섹션 (텍스트 바로 아래) -->
+        <div class="banner-container" id="bannerContainer">
+            <div class="banner-track" id="bannerTrack">
+                <div class="banner-slide"><div class="empty-message">배너를 불러오는 중입니다...</div></div>
+            </div>
+            <button class="banner-btn banner-prev" id="bannerPrev">&lt;</button>
+            <button class="banner-btn banner-next" id="bannerNext">&gt;</button>
+            <div class="banner-dots" id="bannerDots"></div>
+        </div>
+
+        <!-- 2. 공지사항 섹션 -->
+        <div class="notice-container">
+            <div class="notice-header">📢 공지사항</div>
+            <div class="notice-list" id="noticeList">
+                <div class="empty-message" style="padding: 1rem;">공지사항을 불러오는 중입니다...</div>
+            </div>
+        </div>
+
+        <!-- 3. 작품 올리기 버튼 -->
+        <button class="btn-upload" id="heroUploadBtn">✏️ 내 작품 올리기</button>
+    </section>
+
+    <main class="webtoon-section">
+        <h2 class="section-title">✨ 새로 올라온 작품</h2>
+        <div class="webtoon-grid" id="webtoonGrid">
+            <div class="empty-message">작품을 불러오는 중입니다... 🔄</div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="authModal" onclick="closeOnOutsideClick(event)">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeAuthModal()">&times;</button>
+            <h2 id="modalTitle">로그인</h2>
+            <form id="authForm">
+                <div class="input-group" id="nicknameGroup" style="display: none;">
+                    <label>닉네임</label><input type="text" id="nickname">
+                </div>
+                <div class="input-group"><label>이메일</label><input type="email" id="email" required></div>
+                <div class="input-group"><label>비밀번호</label><input type="password" id="password" required></div>
+                <button type="submit" class="btn-submit" id="submitBtn">로그인하기</button>
+            </form>
+            <div class="modal-footer"><span id="switchPrompt">계정이 없으신가요?</span> <a href="javascript:void(0)" id="switchModeBtn" onclick="toggleAuthMode()">회원가입</a></div>
+        </div>
+    </div>
+    <footer><p>&copy; 2026 노넴툰(No Name Toon). All rights reserved.</p></footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        // orderBy 제거로 에러 방지
+        import { getFirestore, doc, setDoc, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBHc5CKcwIRK_WFmb01PtU9C6l-hYfpymc", authDomain: "nonametoon-907aa.firebaseapp.com", projectId: "nonametoon-907aa",
+            storageBucket: "nonametoon-907aa.firebasestorage.app", messagingSenderId: "581148914100", appId: "1:581148914100:web:03e65a96e29086eff682e1", measurementId: "G-Q5P01H9MKZ"
+        };
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+
+        const authModal = document.getElementById('authModal'); const modalTitle = document.getElementById('modalTitle');
+        const nicknameGroup = document.getElementById('nicknameGroup'); const nicknameInput = document.getElementById('nickname');
+        const emailInput = document.getElementById('email'); const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submitBtn'); const switchPrompt = document.getElementById('switchPrompt');
+        const switchModeBtn = document.getElementById('switchModeBtn'); const authActionBtn = document.getElementById('authActionBtn');
+        const userGreeting = document.getElementById('userGreeting'); const heroUploadBtn = document.getElementById('heroUploadBtn');
+        const webtoonGrid = document.getElementById('webtoonGrid'); const mypageLink = document.getElementById('mypageLink');
+
+        let isSignUpMode = false; let currentUser = null;
+
+        // 메인 데이터(배너, 그리드) 불러오기
+        async function loadMainData() {
+            try {
+                const q = query(collection(db, "webtoons"));
+                const querySnapshot = await getDocs(q);
+
+                webtoonGrid.innerHTML = '';
+                const bannerTrack = document.getElementById('bannerTrack');
+                
+                if (querySnapshot.empty) { 
+                    webtoonGrid.innerHTML = '<div class="empty-message">아직 등록된 작품이 없습니다.</div>';
+                    bannerTrack.innerHTML = '<div class="banner-slide"><div class="empty-message" style="display:flex; height:100%; align-items:center; justify-content:center;">등록된 작품이 없습니다.</div></div>';
+                    return; 
+                }
+
+                let webtoonsList = [];
+                querySnapshot.forEach((docSnap) => {
+                    webtoonsList.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                // 최신순으로 정렬
+                webtoonsList.sort((a, b) => {
+                    const timeA = a.created_at ? (a.created_at.toDate ? a.created_at.toDate().getTime() : new Date(a.created_at).getTime()) : 0;
+                    const timeB = b.created_at ? (b.created_at.toDate ? b.created_at.toDate().getTime() : new Date(b.created_at).getTime()) : 0;
+                    return timeB - timeA;
+                });
+
+                // 1. 배너 렌더링 (최대 4개)
+                const bannerItems = webtoonsList.slice(0, 4);
+                const bannerDots = document.getElementById('bannerDots');
+
+                if (bannerItems.length > 0) {
+                    bannerTrack.innerHTML = '';
+                    bannerDots.innerHTML = '';
+
+                    bannerItems.forEach((item, index) => {
+                        const slide = document.createElement('div');
+                        slide.className = 'banner-slide';
+                        const thumbUrl = item.thumbnail_url || 'https://via.placeholder.com/800x400/cccccc/ffffff?text=Banner';
+                        const authorName = item.author_nickname || item.author || '무명작가';
+                        
+                        slide.innerHTML = `
+                            <img src="${thumbUrl}" alt="배너 이미지" onerror="this.src='https://via.placeholder.com/800x400/cccccc/ffffff?text=No+Image'">
+                            <div class="banner-caption">
+                                <div class="banner-title">${item.title}</div>
+                                <div class="banner-desc">작가: ${authorName}</div>
+                            </div>
+                        `;
+                        // 배너 클릭 시 상세 페이지로 이동
+                        slide.onclick = () => { window.location.href = `detail.html?id=${item.id}`; };
+                        bannerTrack.appendChild(slide);
+
+                        const dot = document.createElement('div');
+                        dot.className = `banner-dot ${index === 0 ? 'active' : ''}`;
+                        dot.onclick = (e) => {
+                            e.stopPropagation();
+                            currentIndex = index;
+                            updateSlider();
+                        };
+                        bannerDots.appendChild(dot);
+                    });
+
+                    let currentIndex = 0;
+                    const totalSlides = bannerItems.length;
+
+                    function updateSlider() {
+                        bannerTrack.style.transform = `translateX(-${currentIndex * 100}%)`;
+                        document.querySelectorAll('.banner-dot').forEach((d, idx) => {
+                            d.classList.toggle('active', idx === currentIndex);
+                        });
+                    }
+
+                    document.getElementById('bannerNext').onclick = (e) => {
+                        e.stopPropagation();
+                        currentIndex = (currentIndex + 1) % totalSlides;
+                        updateSlider();
+                    };
+
+                    document.getElementById('bannerPrev').onclick = (e) => {
+                        e.stopPropagation();
+                        currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+                        updateSlider();
+                    };
+
+                    // 4초마다 자동 슬라이드
+                    setInterval(() => {
+                        if (totalSlides > 1) {
+                            currentIndex = (currentIndex + 1) % totalSlides;
+                            updateSlider();
+                        }
+                    }, 4000);
+                }
+
+                // 2. 전체 그리드 렌더링
+                webtoonsList.forEach((data) => {
+                    const card = document.createElement('div');
+                    card.className = 'webtoon-card';
+                    const thumbUrl = data.thumbnail_url || 'https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image';
+                    const authorName = data.author_nickname || data.author || '무명작가';
+
+                    card.innerHTML = `
+                        <img src="${thumbUrl}" alt="웹툰" class="webtoon-thumbnail" onerror="this.src='https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image'">
+                        <div class="webtoon-info">
+                            <div class="webtoon-title">${data.title}</div>
+                            <div class="webtoon-author">작가: ${authorName}</div>
+                        </div>
+                    `;
+                    card.onclick = () => { window.location.href = `detail.html?id=${data.id}`; };
+                    webtoonGrid.appendChild(card);
+                });
+
+            } catch (error) { 
+                console.error("메인 데이터 로드 에러:", error);
+                webtoonGrid.innerHTML = '<div class="empty-message">작품을 불러오는데 실패했습니다.</div>'; 
+            }
+        }
+
+        // 공지사항 불러오기 (데이터베이스에 'notices' 컬렉션이 없을 경우를 대비해 예시 데이터도 준비해 둠)
+        async function loadNotices() {
+            const noticeList = document.getElementById('noticeList');
+            try {
+                const qNotices = query(collection(db, "notices"));
+                const snap = await getDocs(qNotices);
+                noticeList.innerHTML = '';
+
+                let noticesArray = [];
+                snap.forEach((docSnap) => { noticesArray.push({ id: docSnap.id, ...docSnap.data() }); });
+
+                // 데이터베이스에 공지사항이 아직 하나도 없을 경우 기본 공지사항 출력
+                if (noticesArray.length === 0) {
+                    noticeList.innerHTML = `
+                        <div class="notice-item" onclick="window.location.href='notice.html?id=welcome'">
+                            <span class="notice-item-title">[안내] 노넴툰 베타 서비스 오픈 안내 🎉</span>
+                            <span class="notice-item-date">2026.09.16</span>
+                        </div>
+                        <div class="notice-item" onclick="window.location.href='notice.html?id=event'">
+                            <span class="notice-item-title">[이벤트] 첫 작품 등록 시 메인 배너 노출 이벤트!</span>
+                            <span class="notice-item-date">2026.09.15</span>
+                        </div>
+                        <div class="notice-item" onclick="window.location.href='notice.html?id=update'">
+                            <span class="notice-item-title">[업데이트] 에피소드 수정 및 삭제 기능 추가</span>
+                            <span class="notice-item-date">2026.09.14</span>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // DB 데이터가 있을 경우 최신순 정렬 후 최대 3개 출력
+                noticesArray.sort((a, b) => {
+                    const timeA = a.created_at ? (a.created_at.toDate ? a.created_at.toDate().getTime() : new Date(a.created_at).getTime()) : 0;
+                    const timeB = b.created_at ? (b.created_at.toDate ? b.created_at.toDate().getTime() : new Date(b.created_at).getTime()) : 0;
+                    return timeB - timeA;
+                });
+
+                const topNotices = noticesArray.slice(0, 3);
+                topNotices.forEach(notice => {
+                    let dateStr = '방금 전';
+                    if (notice.created_at && notice.created_at.toDate) {
+                        const d = notice.created_at.toDate();
+                        dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+                    }
+                    const item = document.createElement('div');
+                    item.className = 'notice-item';
+                    item.onclick = () => { window.location.href = `notice.html?id=${notice.id}`; };
+                    item.innerHTML = `
+                        <span class="notice-item-title">${notice.title}</span>
+                        <span class="notice-item-date">${dateStr}</span>
+                    `;
+                    noticeList.appendChild(item);
+                });
+
+            } catch (e) {
+                console.error("공지사항 로드 에러:", e);
+                noticeList.innerHTML = '<div class="empty-message" style="padding: 1rem;">공지사항을 불러오지 못했습니다.</div>';
+            }
+        }
+
+        // 함수 실행
+        loadMainData();
+        loadNotices();
+
+        // 인증 모달 이벤트 등
+        window.openLoginModal = () => { authModal.classList.add('active'); document.body.style.overflow = 'hidden'; };
+        window.closeAuthModal = () => { authModal.classList.remove('active'); document.body.style.overflow = 'auto'; };
+        window.closeOnOutsideClick = (e) => { if (e.target === authModal) closeAuthModal(); };
+        window.toggleAuthMode = () => {
+            isSignUpMode = !isSignUpMode;
+            if (isSignUpMode) { modalTitle.innerText = "회원가입"; nicknameGroup.style.display = "block"; nicknameInput.required = true; submitBtn.innerText = "가입 완료하기"; switchModeBtn.innerText = "로그인"; } 
+            else { modalTitle.innerText = "로그인"; nicknameGroup.style.display = "none"; nicknameInput.required = false; submitBtn.innerText = "로그인하기"; switchModeBtn.innerText = "회원가입"; }
+        };
+
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim(); const password = passwordInput.value; const nickname = nicknameInput.value.trim();
+            try {
+                if (isSignUpMode) {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    await updateProfile(userCredential.user, { displayName: nickname });
+                    await setDoc(doc(db, "users", userCredential.user.uid), { email, nickname, role: "reader", createdAt: new Date().toISOString() });
+                    alert("가입 완료!");
+                } else { await signInWithEmailAndPassword(auth, email, password); alert("로그인되었습니다!"); }
+                closeAuthModal(); emailInput.value = ""; passwordInput.value = ""; nicknameInput.value = "";
+            } catch (error) { alert(`오류 발생: ${error.message}`); }
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user) {
+                mypageLink.style.display = "inline";
+                const name = user.displayName || user.email.split('@')[0];
+                userGreeting.innerText = `👋 ${name}님`; userGreeting.style.display = "inline";
+                authActionBtn.innerText = "로그아웃"; authActionBtn.onclick = async () => { await signOut(auth); alert("로그아웃되었습니다."); };
+            } else {
+                mypageLink.style.display = "none"; userGreeting.style.display = "none";
+                authActionBtn.innerText = "로그인"; authActionBtn.onclick = () => openLoginModal();
+            }
+        });
+
+        heroUploadBtn.addEventListener('click', () => {
+            if (!currentUser) { alert('로그인이 필요합니다!'); openLoginModal(); } 
+            else { window.location.href = 'upload.html'; }
+        });
+    </script>
+    <script>
+        const htmlEl = document.documentElement; const themeBtn = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('theme') || 'light'; htmlEl.setAttribute('data-theme', savedTheme);
+        themeBtn.innerText = savedTheme === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드';
+        function toggleTheme() {
+            const next = htmlEl.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            htmlEl.setAttribute('data-theme', next); localStorage.setItem('theme', next);
+            themeBtn.innerText = next === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드';
+        }
+    </script>
+</body>
+</html>
