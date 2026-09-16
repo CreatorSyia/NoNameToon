@@ -29,8 +29,11 @@
         .btn-like:hover { filter: brightness(0.95); }
 
         .description { font-size: 1rem; line-height: 1.8; opacity: 0.9; margin-bottom: 2rem; flex-grow: 1; }
+        
+        /* 작가 전용 메뉴 (기본적으로 숨겨짐) */
         .author-menu { display: none; margin-top: auto; padding-top: 1rem; border-top: 1px dashed var(--border-color); }
         .btn-add-episode { background-color: var(--accent-color); color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
         .episode-section-title { font-size: 1.3rem; margin-bottom: 1rem; font-weight: bold; }
         .episode-list { background-color: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; }
         .episode-item { display: flex; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); cursor: pointer; }
@@ -38,7 +41,6 @@
         .ep-number { font-size: 1.2rem; font-weight: bold; width: 60px; color: var(--accent-color); }
         .ep-title { flex-grow: 1; font-size: 1.1rem; font-weight: 500; }
         
-        /* 개별 회차 조회수 표시 */
         .ep-views { font-size: 0.85rem; opacity: 0.6; margin-right: 15px; }
         .ep-date { font-size: 0.9rem; opacity: 0.6; }
         .empty-episodes { padding: 3rem; text-align: center; opacity: 0.7; }
@@ -63,7 +65,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        // setDoc(저장), deleteDoc(삭제), increment(증가) 기능 추가
         import { getFirestore, doc, getDoc, setDoc, deleteDoc, updateDoc, collection, query, where, getDocs, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -80,7 +81,7 @@
         const episodeList = document.getElementById('episodeList');
         
         let currentUser = null;
-        let isLiked = false; // 현재 로그인한 사용자의 좋아요 여부
+        let isLiked = false;
 
         async function initPage() {
             if (!webtoonId) { alert("잘못된 접근입니다."); window.location.href = "index.html"; return; }
@@ -98,7 +99,6 @@
                 const descriptionStr = (typeof wtData.description === 'string') ? wtData.description.replace(/\n/g, '<br>') : (wtData.description ? String(wtData.description) : "설명이 없습니다.");
                 const thumbUrl = wtData.thumbnail_url || 'https://via.placeholder.com/300x400/cccccc/ffffff?text=No+Image';
                 
-                // 데이터베이스에 있는 조회수와 좋아요 수 가져오기 (없으면 0)
                 const totalViews = wtData.total_views || 0;
                 let totalLikes = wtData.like_count || 0;
 
@@ -109,7 +109,6 @@
                         <h1 class="title">${wtData.title || '제목 없음'}</h1>
                         <div class="author">글/그림 : ${wtData.author_nickname || '무명작가'}</div>
                         
-                        <!-- 통계 및 좋아요 영역 -->
                         <div class="stats-box">
                             <span>👁️ 조회수: ${totalViews}</span>
                             <button id="likeBtn" class="btn-like">🤍 좋아요 <span id="likeDisplayCount">${totalLikes}</span></button>
@@ -117,7 +116,8 @@
 
                         <div class="description">${descriptionStr}</div>
                         
-                        <div class="author-menu" id="authorMenu" style="display: flex; gap: 10px;">
+                        <!-- 작가 전용 메뉴 (CSS에서 기본적으로 숨겨져 있음) -->
+                        <div class="author-menu" id="authorMenu" style="gap: 10px;">
                             <button class="btn-add-episode" id="addEpisodeBtn">+ 새 회차 올리기</button>
                             <button class="btn-add-episode" id="editWebtoonBtn" style="background-color: var(--border-color); color: var(--text-color);">✏️ 작품 수정</button>
                         </div>
@@ -145,8 +145,7 @@
                             const d = ep.created_at.toDate();
                             dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
                         }
-                        
-                        const epViews = ep.views || 0; // 각 회차별 조회수
+                        const epViews = ep.views || 0; 
 
                         const epItem = document.createElement('div');
                         epItem.className = 'episode-item';
@@ -161,19 +160,21 @@
                     });
                 }
 
-                // 3. 로그인 상태 체크 및 좋아요/작가 버튼 로직
+                // 3. 권한 체크 및 좋아요 로직
                 onAuthStateChanged(auth, async (user) => {
                     currentUser = user;
                     
                     if (user) {
-                        // 작가 메뉴 표시 체크
+                        // 로그인한 유저가 해당 웹툰의 작가일 경우에만 메뉴를 보이게 함
                         if (user.uid === wtData.author_id) {
                             document.getElementById('authorMenu').style.display = 'flex';
                             document.getElementById('addEpisodeBtn').onclick = () => { window.location.href = `upload_episode.html?webtoonId=${webtoonId}`; };
                             document.getElementById('editWebtoonBtn').onclick = () => { window.location.href = `edit_webtoon.html?id=${webtoonId}`; };
+                        } else {
+                            // 명시적으로 숨김 처리 (방어 코드)
+                            document.getElementById('authorMenu').style.display = 'none';
                         }
 
-                        // 내가 이 웹툰을 이미 좋아요 했는지 DB(likes 컬렉션)에서 확인
                         const likeRef = doc(db, "likes", `${webtoonId}_${user.uid}`);
                         const likeDoc = await getDoc(likeRef);
                         
@@ -183,12 +184,10 @@
                             likeBtn.innerHTML = `❤️ 좋아요 <span id="likeDisplayCount">${totalLikes}</span>`;
                         }
 
-                        // 좋아요 버튼 클릭 이벤트
                         likeBtn.onclick = async () => {
-                            likeBtn.disabled = true; // 중복 클릭 방지
+                            likeBtn.disabled = true; 
                             try {
                                 if (isLiked) {
-                                    // 좋아요 취소: 내역 삭제 및 카운트 -1
                                     await deleteDoc(likeRef);
                                     await updateDoc(webtoonRef, { like_count: increment(-1) });
                                     totalLikes--;
@@ -196,7 +195,6 @@
                                     likeBtn.classList.remove('active');
                                     likeBtn.innerHTML = `🤍 좋아요 <span id="likeDisplayCount">${totalLikes}</span>`;
                                 } else {
-                                    // 좋아요 누름: 내역 저장 및 카운트 +1
                                     await setDoc(likeRef, { webtoon_id: webtoonId, user_id: user.uid });
                                     await updateDoc(webtoonRef, { like_count: increment(1) });
                                     totalLikes++;
@@ -212,7 +210,8 @@
                         };
 
                     } else {
-                        // 비로그인 상태면 좋아요 클릭 시 알림만 띄움
+                        // 비로그인 상태일 경우 메뉴 숨김 및 좋아요 막기
+                        document.getElementById('authorMenu').style.display = 'none';
                         likeBtn.onclick = () => {
                             alert("로그인 후 이용할 수 있습니다.");
                         };
