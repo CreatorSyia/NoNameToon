@@ -22,11 +22,16 @@
         .title { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
         .author { font-size: 1.1rem; opacity: 0.8; margin-bottom: 1rem; }
         
-        /* 통계 및 좋아요 영역 */
-        .stats-box { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; font-size: 0.95rem; font-weight: bold; opacity: 0.9; }
-        .btn-like { background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        /* 통계 및 버튼(좋아요, 공유하기) 영역 */
+        .stats-box { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; font-size: 0.95rem; font-weight: bold; opacity: 0.9; flex-wrap: wrap; }
+        .action-btn { background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: all 0.2s; }
+        .action-btn:hover { filter: brightness(0.95); }
+        
+        /* 좋아요 버튼 전용 스타일 */
         .btn-like.active { background-color: #fecdd3; border-color: #f43f5e; color: #e11d48; }
-        .btn-like:hover { filter: brightness(0.95); }
+        
+        /* 공유하기 버튼 전용 스타일 */
+        .btn-share:hover { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
 
         .description { font-size: 1rem; line-height: 1.8; opacity: 0.9; margin-bottom: 2rem; flex-grow: 1; }
         
@@ -109,9 +114,11 @@
                         <h1 class="title">${wtData.title || '제목 없음'}</h1>
                         <div class="author">글/그림 : ${wtData.author_nickname || '무명작가'}</div>
                         
+                        <!-- 통계 및 버튼(좋아요, 공유하기) 영역 -->
                         <div class="stats-box">
                             <span>👁️ 조회수: ${totalViews}</span>
-                            <button id="likeBtn" class="btn-like">🤍 좋아요 <span id="likeDisplayCount">${totalLikes}</span></button>
+                            <button id="likeBtn" class="action-btn btn-like">🤍 좋아요 <span id="likeDisplayCount">${totalLikes}</span></button>
+                            <button id="shareBtn" class="action-btn btn-share">🔗 공유하기</button>
                         </div>
 
                         <div class="description">${descriptionStr}</div>
@@ -126,6 +133,20 @@
 
                 const likeBtn = document.getElementById('likeBtn');
                 const likeDisplayCount = document.getElementById('likeDisplayCount');
+                const shareBtn = document.getElementById('shareBtn');
+
+                // --- 🔗 공유하기 버튼 클릭 이벤트 (URL 복사) ---
+                shareBtn.onclick = async () => {
+                    const currentUrl = window.location.href; // 현재 페이지 주소 가져오기
+                    try {
+                        await navigator.clipboard.writeText(currentUrl); // 클립보드에 복사
+                        alert("작품 링크가 복사되었습니다!\n원하는 곳에 붙여넣기(Ctrl+V) 하여 공유해보세요.");
+                    } catch (err) {
+                        console.error('URL 복사 실패:', err);
+                        alert("링크 복사에 실패했습니다. 주소창의 URL을 직접 복사해주세요.");
+                    }
+                };
+                // ------------------------------------------------
 
                 // 2. 에피소드 가져오기
                 const epQuery = query(collection(db, "episodes"), where("webtoon_id", "==", webtoonId));
