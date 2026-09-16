@@ -21,13 +21,11 @@
         .input-group textarea { resize: vertical; min-height: 120px; }
         .input-group input:focus, .input-group select:focus, .input-group textarea:focus { outline: none; border-color: var(--accent-color); }
         
-        /* 버튼 스타일 수정 (나란히 배치) */
         .button-group { display: flex; gap: 10px; margin-top: 1rem; }
         .btn-submit { flex: 1; padding: 1rem; background-color: var(--accent-color); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
         .btn-submit:hover { background-color: var(--accent-hover); }
         .btn-submit:disabled { background-color: var(--border-color); cursor: not-allowed; }
         
-        /* 삭제 버튼 전용 스타일 */
         .btn-delete { flex: 1; padding: 1rem; background-color: #ef4444; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
         .btn-delete:hover { background-color: #dc2626; }
     </style>
@@ -43,6 +41,17 @@
         <h2 class="upload-title">작품 수정하기</h2>
         
         <form id="editForm">
+            <!-- 연재 상태 선택 추가 -->
+            <div class="input-group">
+                <label for="status">연재 상태</label>
+                <select id="status" required>
+                    <option value="연재중">연재중 (빨강)</option>
+                    <option value="휴재중">휴재중 (회색)</option>
+                    <option value="시즌완결">시즌완결 (파랑)</option>
+                    <option value="완결">완결 (하양)</option>
+                </select>
+            </div>
+
             <div class="input-group">
                 <label for="title">웹툰 제목</label>
                 <input type="text" id="title" required>
@@ -80,7 +89,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        // deleteDoc을 추가로 가져옵니다!
         import { getFirestore, doc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -93,6 +101,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const webtoonId = urlParams.get('id');
 
+        const statusInput = document.getElementById('status');
         const titleInput = document.getElementById('title');
         const genreInput = document.getElementById('genre');
         const descInput = document.getElementById('description');
@@ -101,8 +110,8 @@
         const deleteBtn = document.getElementById('deleteBtn');
 
         let currentUser = null;
+        let isAdmin = false;
 
-        // 1. 기존 데이터 불러와서 폼에 채워넣기
         async function loadWebtoonData() {
             if (!webtoonId) { alert("잘못된 접근입니다."); window.history.back(); return; }
             
@@ -111,12 +120,14 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     
-                    if (currentUser.uid !== data.author_id) {
+                    if (currentUser.uid !== data.author_id && !isAdmin) {
                         alert("권한이 없습니다.");
                         window.history.back();
                         return;
                     }
 
+                    // 상태 값 불러오기 (없으면 기본값 '연재중')
+                    statusInput.value = data.status || "연재중";
                     titleInput.value = data.title || "";
                     genreInput.value = data.genre || "판타지";
                     descInput.value = data.description || "";
@@ -130,9 +141,14 @@
             }
         }
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
+                // 관리자 체크
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists() && userDoc.data().role === "admin") {
+                    isAdmin = true;
+                }
                 loadWebtoonData();
             } else {
                 alert("로그인이 필요합니다.");
@@ -140,7 +156,6 @@
             }
         });
 
-        // 2. 수정된 데이터 저장
         document.getElementById('editForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUser || !webtoonId) return;
@@ -150,6 +165,7 @@
 
             try {
                 await updateDoc(doc(db, "webtoons", webtoonId), {
+                    status: statusInput.value, // 연재 상태 저장
                     title: titleInput.value,
                     genre: genreInput.value,
                     description: descInput.value,
@@ -166,23 +182,16 @@
             }
         });
 
-        // 3. 작품 삭제 기능
         deleteBtn.addEventListener('click', async () => {
             if (!currentUser || !webtoonId) return;
-
-            // 사용자에게 한 번 더 확인받기
             const isConfirm = confirm("정말 이 작품을 삭제하시겠습니까?\n한 번 삭제하면 되돌릴 수 없습니다.");
             
             if (isConfirm) {
                 deleteBtn.disabled = true;
                 deleteBtn.innerText = "삭제 중...";
-                
                 try {
-                    // 데이터베이스에서 문서 삭제
                     await deleteDoc(doc(db, "webtoons", webtoonId));
                     alert("작품이 성공적으로 삭제되었습니다.");
-                    
-                    // 삭제 후에는 마이페이지 또는 메인 화면으로 이동
                     window.location.href = "mypage.html";
                 } catch (error) {
                     console.error("삭제 에러:", error);
