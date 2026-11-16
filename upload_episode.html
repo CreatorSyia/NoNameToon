@@ -132,6 +132,7 @@
             try {
                 await addDoc(collection(db, "episodes"), {
                     webtoon_id: webtoonId,
+                    creator_uid: currentUser.uid,
                     episode_number: epNumber,
                     title: epTitle,
                     content_images: imagesArray,
